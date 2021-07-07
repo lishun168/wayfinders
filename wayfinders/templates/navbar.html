@@ -1,0 +1,146 @@
+{% load static %}
+
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand logo" href="/">
+                <img src="{% static 'members/img/logo.png' %}" width="166" height="84">
+            </a>
+        </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="navbarNav" >
+
+                {% if request.user.is_superuser %}
+                <div class="navbarNav-item dropbtn admin" onClick="adminDrop()"> Admin (Admin)</div>
+                <div id="admin-dropdown" class="dropdown-content dropdown-menu-right hide">
+                    <a href="/admin">Admin Site</a>
+                    <a href="/create_member_choice">Add Member</a>
+                    <a href="/upload_skills">Upload Skills</a>
+                    <a href="/upload_industries">Upload Industries</a>
+                </div>
+                {% endif %}
+                <div class="navbarNav-item"><a class="nav-link" href="/members">Members</a></div>
+                <div class="navbarNav-item"><a class="nav-link" href="/forum">Discussions</a></div>
+                {% if user.is_authenticated %}
+                <div class="navbarNav-item dropbtn" onClick="profileDrop()">
+                    <img src="{%static 'members/img/account.png' %}" height="30" width="30">
+                </div>
+                <div id="profile-dropdown" class="dropdown-content dropdown-menu-right hide">
+                    <a href="/my_profile">My Profile</a>
+                    <a href="/my_calendar">My Calendar</a>
+                    <a href="/change_password">Change Password</a>
+                    <a href="/logout">Logout</a>
+                </div>
+                {% else %}
+                <div class="navbarNav-item"><a class="nav-link" href="/login_page">Login</a></div>
+                <div class="navbarNav-item"><a class="nav-link" href="/application_choice">Apply</a></div>
+                {% endif %}
+        </div>
+    </div>
+</nav>
+
+<style>
+    .logo {
+        margin-top: -15px;
+    }
+
+    .navbar {
+        margin: 0px;
+        height: 70px;
+        width: 100%;
+        display: block;
+        background-color: #398677;
+    }
+
+    .ul {
+        display: flex;
+        list-style: none;
+    }
+
+    .nav {
+        width: 25%;
+    }
+
+    #navbarNav {
+        display: flex;
+        margin-top: -20px; 
+        margin-right: 25px;
+        align-items: center;
+    }
+
+    .navbarNav-item>a {
+        color: white;
+        text-decoration: none;
+        float: right;
+    }
+
+    a:hover{
+        color: #ed7739;
+        text-decoration: none;
+    }
+
+    .navbar .navbar-nav {
+        float: right;
+        margin: 5px;
+    }
+
+    #nav-list {
+        display: flex;
+    }
+
+    .dropbtn {
+        cursor: pointer;
+    }
+    
+    #profile-dropdown {
+        position: absolute;
+        margin-top: 255px;
+        z-index: 1;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        overflow: auto;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    }
+
+    #admin-dropdown {
+        margin-top: 255px;
+        right: 250;
+        position: absolute;
+        z-index: 1;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        overflow: auto;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .admin {
+        color: white;
+    }
+
+    .dropdown a:hover {background-color: #ddd;}
+
+    .hide {display: none;}
+
+</style>
+
+<script>
+/* When the user clicks on the button, 
+toggle between hiding and showing the dropdown content */
+function profileDrop() {
+  document.getElementById("profile-dropdown").classList.toggle("hide");
+}
+
+function adminDrop() {
+  document.getElementById("admin-dropdown").classList.toggle("hide");
+}
+
+</script>

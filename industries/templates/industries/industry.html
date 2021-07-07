@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Industry</h1>
+
+    <div class="profile_section">
+        <div class="subtitle">{{industry.name}}</div>
+        <div>{{industry.description}}</div>
+    </div>
+
+    <div class="profile_section">
+        <div class="subtitle">Members in Industry:</div>
+        {% for member in members_in_industry%}
+            <div><a href="/member/{{member.member.pk}}"> {{member.member.name}} </a></div>
+        {% endfor %}
+    </div>
+
+    <div class="profile_section">
+        <div class="subtitle">Users in Industry:</div>
+        {% for user in users_in_industry%}
+            <div><a href="/profile/{{user.pk}}"> {{user.user.first_name}} {{user.user.last_name}}</a></div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script>
+
+    </script>
+
+<style>
+
+    .subtitle {
+        color:  #398677;
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    .profile_section {
+        margin-bottom: 25px;
+    }
+
+</style>
+
+{% endblock %}

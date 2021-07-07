@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="body-content">
+    <div class="title_bar">
+        <div>
+            <h1>
+                {{thread.title}} 
+            </h1>
+        </div>
+        
+        {% if user == thread.created_by or forum_admin %}
+            <div><a href="/forum/update/{{thread.pk}}">EDIT</a></div>
+        {% endif %}
+        {% if forum_admin %}
+            <a href="/sticky/{{thread.pk}}">
+            {% if thread.sticky == False %}
+                <img src="{%static 'members/img/sticky_empty.png' %}" width="30" height="30" style="object-fit: contain; object-position: left top; margin-top: 0px;">
+            {% else %}
+                <img src="{%static 'members/img/sticky_full.png' %}" width="30" height="30" style="object-fit: contain; object-position: left top; margin-top: 0px;">
+            {% endif %}
+            </a>
+        {% else %}
+            {% if thread.sticky == True %}
+                <img src="{%static 'members/img/sticky_full.png' %}" width="30" height="30" style="object-fit: contain; object-position: left top; margin-top: 0px;">
+            {% endif %}
+        {% endif %}
+    </div>
+    
+    <h5>{{thread.subtitle}}</h5>
+
+
+    <div class="discussion">
+        {% for post in posts %}
+            
+            <div class="post">
+                <div class="post_body"> {{post.body}}</div>
+                <div class="post_footer">
+                    <div class="post_sub_footer">
+                        <div class="post_created_by">{{post.created_by}}</div>
+                        <div> {{post.created_at}} </div> 
+                        {% if user == post.created_by or forum_admin %}
+                            <div>
+                                <a href="/forum/post/update/{{post.pk}}">EDIT</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                   <div class="post_sub_footer">
+                       <div class="like_button">
+                            <a href="/like/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/thumbs_up.png' %}" width="25" height="25"></div></a>
+                       </div>
+                       <div>
+                           {{post.likes}}
+                       </div>
+                       <div class="text_button flag_button" >
+                            <a href="/flag/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
+                       </div>
+                       <div class="text_button"> <a href="/forum/reply/{{post.thread.pk}}/{{post.pk}}">REPLY</a></div>
+                   </div>  
+                </div>
+            </div>
+            <div class="replies-section">
+                {% for reply in replies %}
+                    {% if reply.post.pk == post.pk %}
+                        <div class="post">
+                            <div class="post_body"> <div>@{{post.created_by}} </div><br> {{reply.body}}</div>
+                            <div class="post_footer">
+                                <div class="post_sub_footer">
+                                    <div class="post_created_by">{{reply.created_by}}</div>
+                                    <div> {{reply.created_at}} </div> 
+                                    {% if user == post.created_by or forum_admin %}
+                                        <div>
+                                            <a href="/forum/reply/update/{{reply.pk}}">EDIT</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="post_sub_footer">
+                                    <div>
+                                        <a href="/like/{{user.pk}}/{{reply.pk}}"><div class="right-side"><img src="{%static 'members/img/thumbs_up.png' %}" width="25" height="25"></div></a>
+                                    </div>
+                                    <div>
+                                        <a href="/flag/{{user.pk}}/{{reply.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
+                             
+                                    </div>
+                                </div>
+                                
+                                   
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+
+        {% endfor %}
+    </div>
+
+    <div class="section">
+        <div>Add a Post</div>
+        <div class="button_container">
+            <a href="/forum/post/{{thread.pk}}"><button type="button" class="btn btn-primary post-button">Create Post</button></a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <style>
+
+        .discussion {
+            margin-top: 25px;
+        }
+        
+        .post {
+            background: #fafafa;
+            padding: 15px;
+            text-decoration: none;
+            color: #121212;
+            box-shadow: -1px 2px 3px #888888;
+            margin-bottom: 15px;
+        }
+
+        .post-button {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .post_footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10pt;
+            margin-top: 15px;
+        }
+
+        .post_sub_footer {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .post_sub_footer > div {
+            margin: 5px;
+        }
+
+        .section {
+            margin-top: 25px;
+        }
+
+        .button_container {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .create_post_text {
+            width: 100%;
+            min-height: 200px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .right {
+            margin-left: 30px;
+            display: block;
+            float: right;
+        }
+
+        .replies-section {
+            padding-left: 50px;
+        }
+
+        .title_bar {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+        }
+
+        .title_bar > div {
+            margin-right: 10px;
+        }
+
+    </style>
+    <script>
+       
+    </script>
+
+{% endblock %}

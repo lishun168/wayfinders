@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Skill</h1>
+
+    <div class="profile_section">
+        <div class="subtitle">{{skill.name}}</div>
+        <div>{{skill.description}}</div>
+    </div>
+
+    <div class="profile_section">
+        <div class="subtitle">Members with Skill:</div>
+        {% for member in members_with_skill%}
+            <div><a href="/member/{{member.member.pk}}"> {{member.member.name}} </a></div>
+        {% endfor %}
+    </div>
+
+    <div class="profile_section">
+        <div class="subtitle">Users with Skill:</div>
+        {% for user in users_with_skill%}
+            <div><a href="/profile/{{user.pk}}"> {{user.user.first_name}} {{user.user.last_name}}</a></div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script>
+
+    </script>
+
+<style>
+
+    .subtitle {
+        color:  #398677;
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    .profile_section {
+        margin-bottom: 25px;
+    }
+
+</style>
+
+{% endblock %}

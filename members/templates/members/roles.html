@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>{{member_title}} User Roles</h1>
+
+    {% for permission in permissions %}
+        <div class="role_section">
+            <div class="subtitle">{{permission.role_title}}</div>
+                {% for role in permission.userrole_set.all%}
+                    <a href="/edit_role/{{role.pk}}/{{role.permissions.member.pk}}"> <div> {{role.user.first_name}} {{role.user.last_name}}</div></a> 
+                {% endfor %}
+        </div>
+    {% endfor %}
+
+    <div class="button_container">
+        <a href="/create_role/{{member_pk}}"><button type="button" class="btn btn-primary post-button">Create New Role</button></a>
+    </div>
+    <div class="button_container">
+        <a href="/edit_all_roles/{{member_pk}}"><button type="button" class="btn btn-primary post-button">Edit All Roles</button></a>
+    </div>
+    <div class="button_container">
+        <a href="/member/{{member_pk}}"><button type="button" class="btn btn-primary post-button">Return to Profile</button></a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <style>
+    .role_section {
+        margin-bottom: 25px;
+    }
+    </style>
+    
+
+{% endblock %}

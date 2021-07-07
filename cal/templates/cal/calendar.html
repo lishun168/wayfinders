@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}     
+
+
+<div class="calendar-page-body">
+    <div class="calendar-header">
+        <div class="calendar-title">
+            <h3>
+            {% if member_calendar %}
+               <div>  <a href="/member/{{calendar.member.pk}}">{{calendar.member.name}} </a> - {{ date_object|date:"F" }} {{ date_object.year }} </div>
+            {% elif user_calendar %}
+                <div><a href="/profile/{{calendar.user.pk}}"> {{calendar.user.first_name}} {{calendar.user.last_name}} </a> - {{ date_object|date:"F" }} {{ date_object.year }} </div>
+            {% else %}
+                {{calendar.name}} - {{ date_object|date:"F" }} {{ date_object.year }}
+            {% endif %}
+             
+            </h3>
+            <div class="datepicker-section">
+                <div class="form-group datep">
+                    <input id="date-input" type="date" name="bday" max="3000-12-31" 
+                           min="1000-01-01" class="form-control">
+                </div>
+                <div>
+                    <button class="bnt btn-primary" id="datepicker-submit">Change Date</button>
+                </div>
+            </div>
+            <div class="buttons">
+                <div> <a href="/create_event/{{calendar.pk}}"><button class="bnt btn-primary">Create Event</button></a></div>
+                <div> <a href="/create_booking/{{calendar.pk}}"><button class="bnt btn-primary">Create Booking</button></a></div>
+                <div> <a href="/mark_busy/{{calendar.pk}}"><button class="bnt btn-primary">Mark Busy</button></a></div>
+                <div> <a href="/create_filter/{{calendar.pk}}"><button class="bnt btn-primary">Create Calendar</button></a></div>
+            </div>  
+        </div>
+        <div class="header-column">
+            <div class="subtitle">Upcoming Events:</div>
+            {% for event in upcoming_events %}
+                <a href="/event/{{event.pk}}"><div> {{event.name}} - {{event.date}} </div></a>
+            {% endfor %}
+            <div class="subtitle">Recent Events:</div>
+            {% for event in recent_events %}
+                <a href="/event/{{event.pk}}"><div> {{event.name}} - {{event.date}} </div></a>
+            {% endfor %}
+        </div>
+        <div class="header-column">
+            <div class="subtitle">Active Calendars:</div>
+            {% for filter in filters %}
+            <label data-id="{{filter.id}}" class="filter-container">{{filter.name}}
+                <input type="checkbox" {% if filter.pk in filter_params or no_params %} checked="checked" {% endif %}>
+                <span class="checkmark"></span>
+              </label><br>
+            {% endfor %}
+            <div> <button class="bnt btn-primary filter-button">Select</button></div>
+        </div>
+        
+        
+    </div>
+    
+    <div class="calendar-subtitle-bar">
+            
+        {{html_calendar}}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .calendar-page-body {
+            padding: 25px;
+        }
+
+        .calendar-section {
+            width: 100%;
+        }
+
+        .calendar-header {
+            margin-bottom: 45px;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .header-column {
+            margin-left: 100px;
+        }
+
+        .calendar-body {
+            display: flex;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+        }   
+
+        .header {
+            border-bottom: 1px solid #888;
+        }
+
+        .calendar-body > div {
+            width: 12%;
+            border-right: 1px solid #888;
+        }
+        .calendar-time {
+            text-align: center;
+        }
+
+        .calendar-subtitle-bar {
+            width: 50%;
+            display: flex;
+            justify-content: space-evenly;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .day {
+            padding: 4px;
+            height: 175px;
+            width: 175px;
+            border: 1px solid #888;
+        }
+
+        .month {
+            padding-top: 2px;
+            padding-bottom: 25px;
+            width: 100%;
+        }
+
+        td {
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .mon {
+            padding-bottom: 20px;
+        }
+
+        .tue {
+            padding-bottom: 20px;
+        }
+
+        .wed {
+            padding-bottom: 20px;
+        }
+
+        .thu {
+            padding-bottom: 20px;
+        }
+
+        .fri {
+            padding-bottom: 20px;
+        }
+
+        .sat {
+            padding-bottom: 20px;
+        }
+        .sun {
+            padding-bottom: 20px;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .buttons > div {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin-right: 25px;
+        }
+
+        .datep {
+            width: 500px;
+        }
+
+        .datepicker-section {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            overflow: hidden;
+        }
+
+        #datepicker-submit {
+            vertical-align: bottom;
+            margin-left: 10px;
+            margin-bottom: 5px;
+        }
+
+        #date-input {
+        }
+
+        .event-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .event-area > div {
+            align-self: flex-start;
+            width: 100%;
+        }
+
+        .busy-private {
+            background-color: lightpink;
+        }
+
+        .allow-booking {
+            background-color: lightgrey;
+        }
+
+    </style>
+    <script>
+        $(document).ready(function(){
+
+            $('#datepicker-submit').click(function(event) {
+                const date = $('#date-input').val();
+                const dateValues = date.split("-");
+                const currentURL = window.location.pathname;
+                const URLValues = currentURL.split("/");
+                const id = URLValues[2];
+                if(dateValues[0] != null && dateValues[0] != undefined && dateValues[1] != null){
+                    location.href = "/calendar/" + id + "/" + dateValues[0] + "/" + dateValues[1];
+                }
+                
+            });
+
+            $('.filter-button').click(function(event){
+                const currentURL = window.location.pathname;
+                const URLValues = currentURL.split("/");
+                const id = URLValues[2];
+                let url = "/calendar/" + id + "?";
+
+                let filter_added = false;
+
+                $(".filter-container").each(function(index) {
+                    var id = $(this).attr('data-id');
+                    var checkbox = $(this).find('input');
+                    var checked = checkbox.prop('checked');
+                    if(checked){
+                        if(filter_added){
+                            url += "&";
+                        }else{
+                            filter_added = true;
+                        } 
+                        url += 'filters=' + id;
+                        
+                    }
+                });
+
+                if(filter_added === false){
+                    url = url.slice(0, -2);
+                }
+                location.href = url;
+            })
+        })
+        
+    </script>
+
+{% endblock %}

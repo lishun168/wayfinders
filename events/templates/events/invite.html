@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}     
+
+
+<div class="event_details">
+    <div class="title">
+        <div><div class="subtitle">{{event.name}}</div></div>
+        <div class="inline"><a href="/edit_event/{{event.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="15" width="15"> </a></div> 
+    </div>   <br>
+    <div>{{event.description}}</div><br>
+    <div><div class="subtitle">At:</div> {{event.date}}</div><br>
+    <div><div class="subtitle">Starts:</div> {{event.time}}</div><br>
+    <div><div class="subtitle">Ends:</div> {{event.end_time}}</div><br>
+    {% if invite.accept == True %}
+    <div> You have <b>accepted</b> this event</div>
+    {% endif %}
+
+    {% if invite.decline == True %}
+    <div> You have <b>declined</b> this event</div>
+    {% endif %}
+
+    <div class="button-row">
+        {% if invite.accept != True %}
+        <a href="/accept_invite/{{invite.pk}}"><button class="btn btn-primary">Accept</button></a>
+        {% endif %}
+        {% if invite.decline != True %}
+        <a href="/decline_invite/{{invite.pk}}"><button class="btn btn-primary">Decline</button></a>
+        {% endif %}
+    </div>
+
+    <div class="events_details">
+        <div class="subtitle">Invited:</div>
+        {% for invitation in invitations %}
+            <b>{{invitation.member}}</b> - 
+            {% if invitation.accept == True %}
+            Accepted
+            {% endif %}
+            {% if invitation.decline == True %} 
+            Declined
+            {% endif %}
+            {% if invitation.accept == False and invitation.decline == False %}
+            Pending
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div class="events_details">
+        <div class="subtitle">Participants:</div>
+        {% for participant in participants %}
+            <b>{{participant.member}}</b> 
+        {% endfor %}
+    </div>
+    
+</div>
+
+
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+        .event_details {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event_details > div {
+            width: 100%;
+            padding: 10px;
+        }
+
+        .title {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .title > div {
+            margin-right: 10px;
+        }
+
+        .button-row {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button-row > a > button {
+            margin-left: 15px;
+            margin-right: 15px;
+        }
+        
+
+    </style>
+
+{% endblock %}

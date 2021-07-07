@@ -1,0 +1,94 @@
+{% load static %}
+
+{% block content %}
+
+    <div class="title_wrapper">
+        <div class="inline flex-grow">
+            <div class="title_bar">
+                <a class="profile_link" href="/profile/{{profile.pk}}"><h3>{{profile.first_name}} {{profile.last_name}} - {{profile.job_title}}</h3></a>
+            </div>
+            <div class="inline charm-bar">
+                {% if my_profile or admin %}
+                <div><a href="/edit_profile/{{profile.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="30" width="30"> EDIT PROFILE </a></div>
+                {% endif %}
+                {% if my_profile or admin or calendar.public %}
+                <div><a href="/calendar/{{calendar.pk}}"><img src="{%static 'members/img/calendar.png' %}" height="30" width="30"> MY CALENDAR </a></div>
+                {% endif %}
+                {% if my_profile or admin %}
+                <div><a href="/invites/{{profile.pk}}" > <img src="{%static 'members/img/invite.png' %}" height="30" width="30"> MY EVENT INVITES</a></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+   
+    <div class="profile_picture">
+        {% if profile.main_image.url != None %}
+        <img src="{{profile.main_image.url}}" width="400" height="650" style="width: 400px; height: 650px; object-fit: contain; object-position: left top; margin-top: 5px;">
+        {% endif %}
+    </div>
+
+
+{% endblock %}
+
+{% block head %}
+
+    <style>
+
+        .profile_link {
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .subtitle {
+            color:  #398677;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .title_wrapper {
+            width: 100%;
+        }
+
+        .title_bar {
+            background-color:  #398677;
+            color: #fff;
+            padding: 10px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .profile_picture {
+            float: left;
+            width: 500px;
+            height: 650px;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+        }
+
+        .inline {
+            display:flex;
+            align-items: center;
+        }
+
+        .profile {
+            display: block;
+            overflow: hidden;
+        }
+
+        .bio {
+            width: 50%;
+        }
+
+        .flex-grow {
+            display: flex;
+            flex: 1;
+            justify-content: space-between;
+            padding-right: 25px;
+        }
+
+        
+
+    </style>
+{% endblock %}

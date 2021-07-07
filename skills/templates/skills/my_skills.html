@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="section">
+    {% include 'members/base_profile.html' %}
+    <div class="profile">
+        <div class="profile_section">
+            <a href="/add_skill/{{profile.pk}}"><button class="bnt btn-primary">Add Skill</button></a>
+        </div>
+        <div class="profile_section">
+            <div class="subtitle">Skills:</div>
+            {% for member_skill in member_skills %}
+                <div><a href="/skill/{{member_skill.skill.pk}}">{{member_skill.skill.name}}</a></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .subtitle {
+            color:  #398677;
+            font-weight: bold;
+        }
+
+        .title_wrapper {
+            width: 100%;
+        }
+
+        .title_bar {
+            background-color:  #398677;
+            color: #fff;
+            padding: 10px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .profile_picture {
+            float: left;
+            width: 500px;
+            height: 650px;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+        }
+
+        .inline {
+            display:inline;
+        }
+
+    </style>
+{% endblock %}

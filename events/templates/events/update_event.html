@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <form method="post">{% csrf_token %}
+        {{form.name.label}}: {{form.name}} <br> <br>
+        {{form.description.label}}: <br> <br>
+        {{form.description}} <br> <br>
+        {{form.date.label}}: {{form.date}} <br> <br>
+        {{form.time.label}}: {{form.time}} <br> <br>
+        {{form.end_time.label}}: {{form.end_time}} <br> <br>
+        {{form.public.label}} {{form.public}}  <br>
+        {{form.calendar_filter.label}}: {{form.calendar_filter}}<br>
+        <br>
+        <input type="submit" value="Update Event">
+    </form>
+</div>
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .section {
+            padding-top: 25px;
+            padding-bottom: 25px;
+            padding-left: 10%;
+            padding-right: 10%;
+            overflow: hidden;
+        }
+
+        .subtitle {
+            color:  #398677;
+            font-weight: bold;
+        }
+
+        .title_wrapper {
+            width: 100%;
+        }
+
+        .title_bar {
+            background-color:  #398677;
+            color: #fff;
+            padding: 10px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .profile_picture {
+            float: left;
+            width: 500px;
+            height: 650px;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+        }
+
+    </style>
+{% endblock %}

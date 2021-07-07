@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="section">
+    {% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+    <div class="title_wrapper">
+        <div class="inline flex-grow">
+            <div class="title_bar">
+                <h3>{{member.name}}</h3>
+            </div>
+        </div>
+    </div>
+   
+    <div class="profile_picture">
+        {% if member.main_image.url != None %}
+        <img src="{{member.main_image.url}}" width="400" height="650" style="width: 400px; height: 650px; object-fit: contain; object-position: left top; margin-top: 5px;">
+        {% endif %}
+    </div>
+
+    <div class="profile_section">
+            <a href="/add_member_skill/{{member.pk}}"><button class="bnt btn-primary">Add Skill</button></a>
+        </div>
+        <div class="profile_section">
+            <div class="subtitle">Skills:</div>
+            {% for member_skill in member_skills %}
+                <div><a href="/skill/{{member_skill.skill.pk}}">{{member_skill.skill.name}}</a></div>
+            {% endfor %}
+        </div>
+
+</div>
+
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .profile_picture {
+            float: left;
+            width: 500px;
+            height: 650px;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+            display: block;
+            overflow: hidden;
+        }
+
+        .bio {
+            width: 50%;
+        }
+
+        .flex-grow {
+            display: flex;
+            flex: 1;
+            justify-content: space-between;
+            padding-right: 25px;
+        }
+
+        .subtitle_section {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .edit_img {
+            margin-left: 5px;
+        }
+
+    </style>
+{% endblock %}

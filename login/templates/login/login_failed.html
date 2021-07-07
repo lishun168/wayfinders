@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+
+<div class="section">
+   <p> {{message}}</p>
+<form method="GET" action="/login_page"> {% csrf_token %}
+
+  <input class="btn btn-primary" type="submit" name="submit" value="Return to Login">
+
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+    </style>
+{% endblock %}

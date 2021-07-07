@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Choose a CSV to Upload</h1>
+
+    <form class="m_form" method="post" enctype="multipart/form-data">{% csrf_token %}
+        <table>
+            {{form}}
+        </table>
+        <input class="btn btn-primary m_form_button" type="submit" value="Submit">
+    </form>
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script>
+
+    </script>
+
+<style>
+
+    .subtitle {
+        color:  #398677;
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    .profile_section {
+        margin-bottom: 25px;
+    }
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="section">
+    {% include 'members/base_profile.html' %}
+    <div class="profile">
+        <div class="subtitle">
+            My Groups
+        </div>
+        <div class="profile_section">
+        {%for fk_proxy in member_groups %}
+        <table>
+            <a href="/company/{{fk_proxy.company.pk}}"><div>{{fk_proxy.company.name}}</div></a>
+        </table>
+        {% endfor %}
+        </div>
+        <div class="profile_section">
+            <div class="m_form_button_wrapper">
+                <a href="/create_group/{{profile.pk}}"><button class="bnt btn-primary">Add New Group</button></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .subtitle {
+            color:  #398677;
+            font-weight: bold;
+        }
+
+        .title_wrapper {
+            width: 100%;
+        }
+
+        .title_bar {
+            background-color:  #398677;
+            color: #fff;
+            padding: 10px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .profile_picture {
+            float: left;
+            width: 500px;
+            height: 650px;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+        }
+
+        .inline {
+            display:inline;
+        }
+
+    </style>
+{% endblock %}

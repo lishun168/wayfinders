@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>{{member_title}} User Roles</h1>
+
+    {% for permission in permissions %}
+        <a href="/edit_permissions/{{permission.pk}}/{{permission.member.pk}}"> <div> {{permission.role_title}}</div></a>
+    {% endfor %}
+
+    <div class="button_container">
+        <a href="/create_permissions/{{member_pk}}"><button type="button" class="btn btn-primary post-button">Create Permissions</button></a>
+    </div>
+     <div class="button_container">
+        <a href="/member/{{member_pk}}"><button type="button" class="btn btn-primary post-button">Return to Profile</button></a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    
+
+{% endblock %}

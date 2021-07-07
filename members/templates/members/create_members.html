@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Add Member Of</h1>
+
+    {% for member in members %}
+        <a href="/signup/{{member.pk}}"> <div> {{member.name}}</div></a>
+{% endfor %}
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script>
+        
+    </script>
+
+{% endblock %}

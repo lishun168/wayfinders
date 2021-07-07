@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="section">
+    {% include 'members/base_profile.html' %}
+    <div class="profile">
+        <div class="profile_section">
+            <div class="subtitle">Member:</div>
+            <div><a href="/member/{{profile.member.pk}}">{{profile.member}}</a></div>
+        </div>
+        <div class="profile_section">
+            <div class="subtitle">Calendars:</div>
+            {% for filter in filters %}
+            <div><a href="/calendar/{{filter.calendar.pk}}?filters={{filter.pk}}">{{filter.name}}</a></div>
+            {% endfor %}
+        </div>
+
+        {% if my_profile or admin%}
+        <div class="profile_section">
+            <div class="subtitle">Location:</div>
+            <div>{{profile.address}}</div>
+            <div>{{profile.city}}, {{profile.province}}, {{profile.country}}</div>
+            <div>{{profile.postal_code}}</div>
+        </div>
+        {% endif %}
+
+        <div class="profile_section">
+            <div class="subtitle">Business:</div>
+            <div>{{profile.business_phone}}</div>
+            {% if my_profile or admin%}
+                {% if profile.home_phone != None %}
+                <div class="subtitle">Home:</div>
+                <div>{{profile.home_phone}}</div>
+                {% endif %}
+                {% if profile.cell_phone != None %}
+                <div class="subtitle">Cell:</div>
+                <div>{{profile.cell_phone}}</div>
+                {% endif %}
+            {% endif %}
+            <div class="subtitle">Email:</div>
+            <div>{{profile.email}}</div>
+        </div>
+        <div class="profile_section">
+            {% if my_profile or admin%}
+            <a href="/my_groups/{{profile.pk}}" > 
+                <div class="inline">
+                    <div class="subtitle">Groups:</div>
+                    <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> 
+                </div>
+            </a>
+            {% else %}
+            <div class="inline">
+                <div class="subtitle">Groups:</div> 
+            </div>
+            {% endif %}
+            {% for company in member_companies %}
+                {% if my_profile %}
+                <a href="/group/{{company.company.pk}}"><div>{{company.company}}</div></a>
+                {% else %}
+                    {% if company.public == True %}
+                    <a href="/group/{{company.company.pk}}"><div>{{company.company}}</div></a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="profile_section">
+            {% if my_profile or admin%}
+            <a href="/my_skills/{{profile.pk}}" > 
+                <div class="inline">
+                    <div class="subtitle">Skills:</div>
+                    <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> 
+                </div>
+            </a>
+            {% else %}
+            <div class="inline">
+                <div class="subtitle">Skills:</div>
+            </div>
+            {% endif %}
+            {% for skill in user_skills %}
+                <a href="/skill/{{skill.pk}}"><div>{{skill.skill}}</div></a>
+            {% endfor %}
+        </div>
+        <div class="profile_section">
+            {% if my_profile or admin%}
+            <a href="/my_industries/{{profile.pk}}" > 
+                <div class="inline">
+                    <div class="subtitle">Industries:</div>
+                    <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> 
+                </div>
+            </a>
+            {% else %}
+            <div class="inline">
+                <div class="subtitle">Industries:</div>
+            </div>
+            {% endif %}
+            {% for industry in user_industries %}
+                <a href="/industry/{{industry.industry.pk}}"><div>{{industry.industry.name}}</div></a>
+            {% endfor %}
+        </div>
+        <div class="profile_section">
+            <div class="subtitle">Member Of:</div>
+            {% for member in member_of %}
+                <div> <a href="/member/{{member.member.pk}}">{{member.member.name}} </a> </div>
+            {% endfor %}
+        </div>
+        <div class="profile_section">
+            <div class="subtitle">Member Since: </div>
+            <div> {{profile.membership_since}} </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .subtitle {
+            color:  #398677;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .title_wrapper {
+            width: 100%;
+        }
+
+        .title_bar {
+            background-color:  #398677;
+            color: #fff;
+            padding: 10px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+        }
+
+        .inline {
+            display:flex;
+            align-items: center;
+        }
+
+        .profile {
+            display: block;
+            overflow: hidden;
+        }
+
+        .bio {
+            width: 50%;
+        }
+
+    </style>
+{% endblock %}

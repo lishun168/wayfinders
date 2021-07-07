@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h3>Choose your application method</h3>
+</div>
+<div>
+    <a href="/"><button type="button" class="btn btn-primary post-button">File Application</button></a>
+    <a href="/application"><button type="button" class="btn btn-primary post-button">Online Application</button></a>
+</div>
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+
+{% endblock %}

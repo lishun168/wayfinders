@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1 class="title">{{title}}</h1>
+    <form class="m_form" method="post" enctype="multipart/form-data">{% csrf_token %}
+        <table>
+            {{form}}
+        </table>
+        <div class="m_form_button_wrapper">
+            <input class="btn btn-primary m_form_button" type="submit" value="{{button_text}}">
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+    <style>
+
+        .subtitle {
+            color:  #398677;
+            font-weight: bold;
+        }
+
+        .title_wrapper {
+            width: 100%;
+        }
+
+        .title_bar {
+            background-color:  #398677;
+            color: #fff;
+            padding: 10px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .profile_picture {
+            float: left;
+            width: 500px;
+            height: 650px;
+        }
+
+        .profile_section {
+            margin-bottom: 25px;
+        }
+
+        .title {
+            margin-left: 10px;
+            margin-bottom: 25px;
+        }
+
+    </style>
+    <script>
+       
+    </script>
+{% endblock %}

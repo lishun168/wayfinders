@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Members Directory</h1>
+
+    <div class="input-group mb-3">
+        <input id="search_query" type="text" class="form-control" placeholder="Search Directory" aria-label="Search" aria-describedby="basic-addon2">
+        <div class="input-group-append">
+          <button id="search-button" class="button-search btn btn-outline-secondary" type="button">Search</button>
+        </div>
+    </div>
+    {% if query %}
+    <h3>Search results for {{ query }}...</h3>
+    {% endif %}
+    {% for member in members %}
+        <a href="/member/{{member.pk}}"> <div> {{member.name}}</div></a>
+{% endfor %}
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <script>
+        $(document).ready( function() {
+            $("#search-button").click( function(event) {
+                var str = $('#search_query').val();
+                var search_url = "http://127.0.0.1:8000/search/" + str;
+                window.location.replace(search_url);
+            });
+        });
+    </script>
+
+{% endblock %}
