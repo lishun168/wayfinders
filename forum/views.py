@@ -1,9 +1,16 @@
 from django.shortcuts import render
 from django.views import View
-from .models import Discussion, Post, Reply, MemberLikeOrFlagPost, MemberLikeOrFlagReply
+from .models import Discussion
+from .models import Post
+from .models import Reply
+from .models import MemberLikeOrFlagPost
+from .models import MemberLikeOrFlagReply
+from .models import UserFlagPost
 from members.models import MemberUser
-from django.views.generic.edit import CreateView, UpdateView
-from django.http import HttpResponseRedirect, HttpResponse
+from django.views.generic.edit import CreateView
+from django.views.generic.edit import UpdateView
+from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.views.decorators import csrf
 from django.core.paginator import Paginator
 from login.views import LoginPermissionMixin
@@ -38,22 +45,29 @@ class ForumDirectory(LoginPermissionMixin, View):
         if contains:
             queryQ &= Q(post__body__icontains=contains) | Q(reply__body__contains=contains)
                
-        threads = Discussion.objects.filter(queryQ)
+        discussions = Discussion.objects.filter(queryQ)
+        member_user = MemberUser.objects.get(user=self.request.user)
+        member_flags = UserFlagPost.objects.filter(user=member_user)
+
+        for discussion in discussions:
+            for flag in member_flags:
+                if flag.discussion == discussion and flag.flagged == True:
+                    discussion.flagged = True
 
         if oldest == "true":
-            threads = sorted(threads, key=operator.attrgetter('created_at'))
+            discussions = sorted(discussions, key=operator.attrgetter('created_at'))
         else:
-            threads = sorted(threads, key=operator.attrgetter('created_at'), reverse=True)
+            discussions = sorted(discussions, key=operator.attrgetter('created_at'), reverse=True)
 
         if likes == "true":
-            threads = sorted(threads, key=operator.attrgetter('likes'), reverse=True)
+            discussions = sorted(discussions, key=operator.attrgetter('likes'), reverse=True)
         if sticky != "false":
-            threads = sorted(threads, key=operator.attrgetter('sticky'), reverse=True)
+            discussions = sorted(discussions, key=operator.attrgetter('sticky'), reverse=True)
         if check_flags == "true":
-            threads = sorted(threads, key=operator.attrgetter('number_of_flags'), reverse=True)
+            discussions = sorted(discussions, key=operator.attrgetter('number_of_flags'), reverse=True)
             context['check_flags'] = True
 
-        context['threads'] = threads
+        context['threads'] = discussions
     
         return render(request, self.template_name, context)
 
@@ -99,6 +113,31 @@ class ThreadPage(LoginPermissionMixin, View):
         like_or_flag_replies = MemberLikeOrFlagReply.objects.filter(member=user_member, reply__discussion=thread)
 
         forum_admin = self.request.user.is_superuser or user_member.is_wf_admin or user_member.is_forum_mod
+
+        for post in posts:
+            for flag in like_or_flag_posts:
+                if flag.post == post:
+                    if flag.flagged == True:
+                        post.flagged = True
+                    else:
+                        post.flagged = False
+                    if flag.like == True:
+                        post.liked = True
+                    else:
+                        post.liked = False
+
+        for reply in replies:
+            for flag in like_or_flag_posts:
+                if reply.post == post:
+                    if flag.flagged == True:
+                        reply.flagged = True
+                    else:
+                        reply.flagged = False
+                    if flag.like == True:
+                        reply.liked = True
+                    else:
+                        reply.liked = False
+                
 
         context = {
             'thread': thread,
@@ -290,6 +329,42 @@ class UpdateReply(LoginPermissionMixin, UpdateView):
         success_url = '/forum/' + str(thread_pk)
         return HttpResponseRedirect(success_url)
 
+class ViewFlaggedDiscussions(View):
+    template_name = 'forum/flags.html'
+
+    def get(self, request):
+        discussions = Discussion.objects.filter(number_of_flags__gt=0).distinct().order_by('-number_of_flags')
+
+        context = {
+            'discussions': discussions
+        }
+
+        return render(request, self.template_name, context)
+
+class ViewFlaggedPosts(View):
+    template_name = 'forum/flags.html'
+
+    def get(self, request):
+        posts = Post.objects.filter(number_of_flags__gt=0).distinct().order_by('-number_of_flags')
+
+        context = {
+            'posts': posts
+        }
+
+        return render(request, self.template_name, context)
+
+class ViewFlaggedReplies(View):
+    template_name = 'forum/flags.html'
+
+    def get(self, request):
+        replies = Reply.objects.filter(number_of_flags__gt=0).distinct().order_by('-number_of_flags')
+
+        context = {
+            'replies': replies
+        }
+
+        return render(request, self.template_name, context)
+
 @csrf.csrf_exempt
 def sticky(request, discussion_pk):
     discussion = Discussion.objects.get(pk=discussion_pk)
@@ -325,7 +400,7 @@ def like(request, member_pk, post_pk):
         post.likes +=1
         post.save()
 
-    success_url = "/forum/" + str(post.thread.pk)
+    success_url = "/forum/" + str(post.discussion.pk)
     return HttpResponseRedirect(success_url)
 
 @csrf.csrf_exempt
@@ -352,7 +427,7 @@ def like_reply(request, member_pk, reply_pk):
         reply.likes += 1
         reply.save()
 
-    success_url = "/forum/" + str(reply.thread.pk)
+    success_url = "/forum/" + str(reply.discussion.pk)
     return HttpResponseRedirect(success_url)
 
 @csrf.csrf_exempt
@@ -381,7 +456,7 @@ def flag(request, member_pk, post_pk):
         post.number_of_flags +=1
         post.save()
 
-    success_url = "/forum/" + str(post.thread.pk)
+    success_url = "/forum/" + str(post.discussion.pk)
     return HttpResponseRedirect(success_url)
 
 @csrf.csrf_exempt
@@ -410,6 +485,33 @@ def flag_reply(request, member_pk, reply_pk):
         reply.number_of_flags +=1
         reply.save()
 
-    success_url = "/forum/" + str(reply.thread.pk)
+    success_url = "/forum/" + str(reply.discussion.pk)
+    return HttpResponseRedirect(success_url)
+
+@csrf.csrf_exempt
+def flag_discussion(request, member_pk, discussion_pk):
+    member = MemberUser.objects.get(pk=member_pk)
+    discussion = Discussion.objects.get(pk=discussion_pk)
+    try:
+        user_flag_discussion = UserFlagPost.objects.get(user=member, discussion=discussion)
+        if user_flag_discussion.flagged is True:
+            user_flag_discussion.flagged = False
+            discussion.number_of_flags -=1
+        else:
+            user_flag_discussion.flagged = True
+            discussion.number_of_flags += 1
+        discussion.save()
+        user_flag_discussion.save()
+    except UserFlagPost.DoesNotExist:
+        user_flag_discussion = UserFlagPost()
+        user_flag_discussion.flagged = True
+        user_flag_discussion.user = member
+        user_flag_discussion.discussion = discussion
+        user_flag_discussion.save()
+
+        discussion.number_of_flags += 1
+        discussion.save()
+
+    success_url = "/forum"
     return HttpResponseRedirect(success_url)
 

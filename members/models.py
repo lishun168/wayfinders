@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from search.models import SearchObject
 from phonenumber_field.modelfields import PhoneNumberField
+from django.utils.timezone import now
 
 class Member(models.Model):
     name = models.CharField(max_length=255)
@@ -20,6 +21,7 @@ class Member(models.Model):
     membership_expiry = models.DateField(auto_now_add=False, auto_now=False, blank=True, null=True)
     membership_since = models.DateField(auto_now_add=False, blank=True, null=True) 
     business_email = models.EmailField(max_length=255)
+    number_of_flags = models.IntegerField(default=0)
 
     def __str__(self):
         return '%s' % (self.name)
@@ -50,6 +52,7 @@ class MemberUser(models.Model):
     publicly_viewable = models.BooleanField(u'Public', default=True)
     membership_since = models.DateField(auto_now_add=False, blank=True, null=True)
     main_image = models.ImageField(upload_to="profile_gallery", blank=True)
+    number_of_flags = models.IntegerField(default=0)
 
 
     def __str__(self):
@@ -115,16 +118,56 @@ class Gallery(models.Model):
         verbose_name_plural="Galleries"
 
 class Application(models.Model):
-    name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
-    org_name = models.CharField(max_length=255)
-    org_email = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    business_name = models.CharField(max_length=255, blank=True, null=True)
+    business_website = models.URLField(max_length=255, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(u'City/Town', max_length=255, blank=True, null=True)
+    province = models.CharField(max_length=255, blank=True, null=True)
+    postal_code = models.CharField(max_length=255, blank=True, null=True)
+    birthdate = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = PhoneNumberField()
+    referred_by = models.CharField(max_length=255)
+    other = models.TextField()
+    date = models.DateField(now())
+    processed = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
 
     def __str__(self):
-        return '%s: %s' % (self.org_name, self.name)
+        return '%s: %s' % (self.business_name, self.surname)
 
     class Meta:
         verbose_name="Application"
         verbose_name_plural="Applications"
 
-#class ApplicationUpload(models.Model):
+class ApplicationUpload(models.Model):
+    file = models.FileField(upload_to="application_file")
+    date = models.DateField(now())
+    processed = models.BooleanField(default=False)
+    approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s' % (self.file)
+
+    class Meta:
+        verbose_name="Application Upload"
+        verbose_name_plural="Application Uploads"
+
+class UserFlagUser(models.Model):
+    user = models.ForeignKey(MemberUser, on_delete=models.CASCADE)
+    flagged_user = models.ForeignKey(MemberUser, on_delete=models.CASCADE, related_name="flagged_user")
+    flagged = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s - %s : %s' % (self.flagged_user, self.user, self.flagged)
+
+class UserFlagMember(models.Model):
+    user = models.ForeignKey(MemberUser, on_delete=models.CASCADE)
+    member = models.ForeignKey(Member, on_delete=models.CASCADE)
+    flagged = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s - %s : %s' % (self.member, self.user, self.flagged)

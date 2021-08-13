@@ -32,7 +32,12 @@
                             </div>
                         {% endif %}
                     </div>
-                    <div>
+                    <div class="inline">
+                        {% if thread.flagged %}
+                            <a href="/flag_discussion/{{user.pk}}/{{thread.pk}}"><div class="right-side"><img src="{%static 'members/img/flag_filled.png' %}" width="25" height="25"></div></a>
+                        {% else %}
+                            <a href="/flag_discussion/{{user.pk}}/{{thread.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
+                        {% endif %}
                         {% if thread.sticky == True %}
                         <img src="{%static 'members/img/sticky_full.png' %}" width="20" height="20" style="object-fit: contain; object-position: left top; margin-top: 0px;">
                         {% endif %}

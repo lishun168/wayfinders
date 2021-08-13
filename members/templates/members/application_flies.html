@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Application Uploaded</h1>
+
+    {% for application in applications %}
+        <div> {{application.file }} </div>
+{% endfor %}
+</div>
+<div class="button_container">
+    <form action="/application_files?approved=true">
+    {% csrf_token %} 
+        <input type="submit" value="Approve" />
+    </form>
+    <form action="/application_files?approved=false">
+        <input type="submit" value="Deny" />
+    </form>
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+{% endblock %}

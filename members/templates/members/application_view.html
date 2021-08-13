@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Applications</h1>
+
+    {% for application in applications %}
+        <a href="/application/{{application.id}}/"><div> {{application.business_name }} </div></a>
+{% endfor %}
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+{% endblock %}

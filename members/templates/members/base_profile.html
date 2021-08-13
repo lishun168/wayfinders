@@ -7,6 +7,13 @@
             <div class="title_bar">
                 <a class="profile_link" href="/profile/{{profile.pk}}"><h3>{{profile.first_name}} {{profile.last_name}} - {{profile.job_title}}</h3></a>
             </div>
+            <div>
+                {% if flagged %}
+                    <a href="/flag_user/{{user.pk}}/{{profile.pk}}"><div class="right-side"><img src="{%static 'members/img/flag_filled.png' %}" width="25" height="25"></div></a>
+                {% else %}
+                    <a href="/flag_user/{{user.pk}}/{{profile.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
+                {% endif %}
+            </div>
             <div class="inline charm-bar">
                 {% if my_profile or admin %}
                 <div><a href="/edit_profile/{{profile.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="30" width="30"> EDIT PROFILE </a></div>

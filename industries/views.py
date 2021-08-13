@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.views import View
 from django.views.generic.edit import UpdateView
 from django.views.generic.edit import CreateView
+from django.views.generic.edit import DeleteView
 from django.contrib import messages
 import csv
 import io
@@ -163,11 +164,58 @@ class UploadIndustries(LoginPermissionMixin, View):
             io_string = io.StringIO(decoded_file)
 
             for line in csv.reader(io_string, delimiter=","):
-                industry = Industry()
-                industry.name = line[0]
-                industry.description = line[1]
-                industry.save()
+                industry_name = line[0]
+                count = Industry.objects.filter(name=industry_name).count()
+                if count == 0:
+                    industry = Industry()
+                    industry.name = industry_name
+                    industry.description = line[1]
+                    industry.save()
 
         messages.add_message(request, messages.SUCCESS, "Your file has been uploaded successfully")
         return HttpResponseRedirect('/upload_industries')
+
+class RemoveIndustryFromUser(LoginPermissionMixin, DeleteView):
+    template_name = 'create_edit_model.html'
+    model = UsertoIndustry
+
+    def get_context_data(self, **kwargs):
+        context = super(RemoveIndustryFromUser, self).get_context_data(**kwargs)
+        context['button_text'] = 'Remove Industry'
+        return context
+    
+    def dispatch(self, *args, **kwargs):
+        return super(RemoveIndustryFromUser, self).dispatch(*args, **kwargs)
+    
+    def delete(self, request, *arg, **kwargs):
+        pk = self.kwargs.get('pk')
+        user_pk = self.kwargs.get('user_pk')
+        
+        participant = UsertoIndustry.objects.get(pk=pk)
+        participant.delete()
+
+        success_url = "/profile/" + str(user_pk)
+        return HttpResponseRedirect(success_url )
+
+class RemoveIndustryFromMember(LoginPermissionMixin, DeleteView):
+    template_name = 'create_edit_model.html'
+    model = MemberToIndustry
+
+    def get_context_data(self, **kwargs):
+        context = super(RemoveIndustryFromMember, self).get_context_data(**kwargs)
+        context['button_text'] = 'Remove Industry'
+        return context
+    
+    def dispatch(self, *args, **kwargs):
+        return super(RemoveIndustryFromMember, self).dispatch(*args, **kwargs)
+    
+    def delete(self, request, *arg, **kwargs):
+        pk = self.kwargs.get('pk')
+        member_pk = self.kwargs.get('member_pk')
+        
+        participant = MemberToIndustry.objects.get(pk=pk)
+        participant.delete()
+
+        success_url = "/member/" + str(member_pk)
+        return HttpResponseRedirect(success_url)
 

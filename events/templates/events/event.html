@@ -16,6 +16,7 @@
             {% endif %}
         </div>
     </div>   <br>
+    <div>{{event.get_event_type_display}}</div><br>
     <div>{{event.description}}</div><br>
     <div><b>At:</b> {{event.date}}</div><br>
     <div><b>Starts:</b> {{event.time}}</div><br>
@@ -34,7 +35,7 @@
 
     <div class="events_details">
         <div class="subtitle">Calendar:</div>
-        <div><a href="/calendar/{{event.calendar.pk}}"> {{event.calendar.name}} </a></div>
+        <div><a href="/calendar/{{event.calendar.pk}}?filters={{event.sub_calendar.pk}}"> {{event.sub_calendar.name}} </a></div>
     </div>
 
     <div class="events_details">
@@ -54,11 +55,18 @@
     </div>
 
     <div class="events_details">
-        <div class="subtitle">Participants:</div>
+        <div class="inline">
+            <div class="subtitle">Participants:</div>
+            <div class="edit_img"><a href="/add_participant/{{event.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> </a></div> 
+        </div>
+        
         {% for participant in participants %}
             
             <div>
-                <a href="/profile/{{participant.member.pk}}"><b>{{participant.member}}</b></a> 
+                <div class="inline">
+                    <a href="/profile/{{participant.member.pk}}"><b>{{participant.member}}</b></a> 
+                    <div class="edit_img"><a href="/remove_participant/{{participant.pk}}/{{event.pk}}" > <img src="{%static 'members/img/close.png' %}" height="16" width="16"> </a></div> 
+                </div>
                 {% if my_part == True %}
                     {% if participant.is_administrator == False and admin == True %}
                     {% endif %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    {% if discussions.count > 0%} 
+        <h1>Flagged Discussions</h1>
+    {% elif posts.count > 0 %}
+        <h1>Flagged Posts</h1>
+    {% elif replies.count > 0 %}
+        <h1>Flagged Replies</h1>
+    {% else %}
+        <h1> No Flags to Show </h1>
+    {% endif %}
+    
+    {% for discussion in discussions %}
+        <table>
+            <tr>
+                <td><a href="/forum/{{discussion.pk}}"> <div> {{discussion.title}}</div></a></td>
+                <td> {{discussion.number_of_flags}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+    {% for post in posts %}
+         <table>
+            <tr>
+                <td><a href="/forum/{{post.discussion.pk}}"> <div> {{post.created_by.first_name}} {{post.created_by.last_name}} </div></a></td>
+                <td> {{post.number_of_flags}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+    {% for reply in replies %}
+         <table>
+            <tr>
+                <td><a href="/forum/{{reply.discussion.pk}}"> <div> {{reply.created_by.first_name}} {{reply.created_by.last_name}}  </div></a></td>
+                <td> {{reply.number_of_flags}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+   
+
+{% endblock %}

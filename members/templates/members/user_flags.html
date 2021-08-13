@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    {% if users.count > 0%} 
+        <h1>Flagged Users</h1>
+    {% elif members.count > 0 %}
+        <h1>Flagged Members</h1>
+    {% else %}
+        <h1> No Flags to Show </h1>
+    {% endif %}
+    
+    {% for user in users %}
+        <table>
+            <tr>
+                <td><a href="/profile/{{user.pk}}"> <div> {{user.first_name}} {{user.last_name}}</div></a></td>
+                <td> {{user.number_of_flags}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+    {% for member in members %}
+         <table>
+            <tr>
+                <td><a href="/member/{{member.pk}}"> <div> {{member.name}} </div></a></td>
+                <td> {{member.number_of_flags}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+   
+
+{% endblock %}

@@ -4,6 +4,12 @@ from cal.models import Calendar, Filter
 from datetime import datetime
 from search.models import SearchObject
 
+class EventType(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return '%s' % (self.name)
+
 class Event(models.Model):
     name = models.CharField(max_length=255, default="")
     description = models.TextField(u'Description', blank=True, null=True)
@@ -21,13 +27,15 @@ class Event(models.Model):
     booking_interval_minutes = models.IntegerField(u'Session Length', default=30)
     booking_interval_buffer = models.IntegerField(u'Minutes Between Sessions *optional*', default=0)
     busy_private = models.BooleanField(default=False)
+    number_of_flags = models.IntegerField(default=0)
+    event_type = models.ForeignKey(EventType, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return '%s - %s' % (self.calendar, self.name)
 
     def check_overlap(self, fixed_start, fixed_end, new_start, new_end):
         overlap = False
-        if new_start == fixed_end or new_end == fixed_start:
+        if new_start == fixed_end or new_end == fixed_start:        
             overlap = False
         elif (new_start >= fixed_start and new_start <= fixed_end) or (new_end >= fixed_start and new_end <= fixed_end):
             overlap = True
@@ -72,4 +80,12 @@ class GuestParticipant(models.Model):
     class Meta:
         verbose_name='Guest Participant'
         verbose_name_plural='Guest Participants'
+
+class UserFlagEvent(models.Model):
+    user = models.ForeignKey(MemberUser, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    flagged = models.BooleanField(default=False)
+
+    def __str__(self):
+        return '%s - %s : %s' % (self.event, self.user, self.flagged)
 

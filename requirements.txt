@@ -10,6 +10,7 @@ decorator==5.0.9
 Django==3.1.2
 django-bootstrap3-datetimepicker==2.2.3
 django-phonenumber-field==5.0.0
+django-rest-knox==4.1.0
 djangorestframework==3.12.4
 dynaconf==3.1.4
 hvac==0.10.14

@@ -28,10 +28,12 @@
                 </div>
             </div>
             <div class="buttons">
-                <div> <a href="/create_event/{{calendar.pk}}"><button class="bnt btn-primary">Create Event</button></a></div>
-                <div> <a href="/create_booking/{{calendar.pk}}"><button class="bnt btn-primary">Create Booking</button></a></div>
-                <div> <a href="/mark_busy/{{calendar.pk}}"><button class="bnt btn-primary">Mark Busy</button></a></div>
-                <div> <a href="/create_filter/{{calendar.pk}}"><button class="bnt btn-primary">Create Calendar</button></a></div>
+                {% if can_edit %}
+                    <div> <a href="/create_event/{{calendar.pk}}"><button class="bnt btn-primary">Create Event</button></a></div>
+                    <div> <a href="/create_booking/{{calendar.pk}}"><button class="bnt btn-primary">Create Booking</button></a></div>
+                    <div> <a href="/mark_busy/{{calendar.pk}}"><button class="bnt btn-primary">Mark Busy</button></a></div>
+                    <div> <a href="/create_filter/{{calendar.pk}}"><button class="bnt btn-primary">Create Calendar</button></a></div>
+                {% endif %}
             </div>  
         </div>
         <div class="header-column">

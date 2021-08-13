@@ -18,6 +18,13 @@
             {% endfor %}
         </div>
 
+        <div class="profile_section">
+        <div class="subtitle">Upcoming Participating Events:</div>
+        {% for part in participations %}
+            <a href="/event/{{part.events.pk}}"><div> {{part.events.name}} - {{part.events.date}} </div></a>
+        {% endfor %}
+    </div>
+
         {% if my_profile or admin%}
         <div class="profile_section">
             <div class="subtitle">Location:</div>
@@ -80,7 +87,10 @@
             </div>
             {% endif %}
             {% for skill in user_skills %}
-                <a href="/skill/{{skill.pk}}"><div>{{skill.skill}}</div></a>
+                <div class="inline">
+                    <a href="/skill/{{skill.pk}}"><div>{{skill.skill}}</div></a>
+                    <a href="/remove_skill_user/{{skill.pk}}/{{profile.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                </div>
             {% endfor %}
         </div>
         <div class="profile_section">
@@ -97,7 +107,11 @@
             </div>
             {% endif %}
             {% for industry in user_industries %}
-                <a href="/industry/{{industry.industry.pk}}"><div>{{industry.industry.name}}</div></a>
+                <div class="inline">
+                    <a href="/industry/{{industry.industry.pk}}"><div>{{industry.industry.name}}</div></a>
+                    <a href="/remove_industry_user/{{industry.pk}}/{{profile.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                </div>
+                
             {% endfor %}
         </div>
         <div class="profile_section">

@@ -1,4 +1,7 @@
-from rest_framework import viewsets
+from django.core.exceptions import PermissionDenied
+from requests import Response
+from rest_framework import viewsets, permissions
+from members.models import MemberUser
 from .models import Discussion
 from .models import Post
 from .models import Reply
@@ -14,7 +17,7 @@ from wayfinders.functions import add_to_queryset
 
 class DiscussionAPI(viewsets.ModelViewSet):
     serializer_class = DiscussionSerializer
-    http_method_names = ['get', 'head', 'post', 'put']
+    http_method_names = ['get', 'head']
 
     def get_queryset(self):
         title = self.request.query_params.get('title')
@@ -45,9 +48,37 @@ class DiscussionAPI(viewsets.ModelViewSet):
         return Discussion.objects.all()
 
 
+class DiscussionPostAPI(viewsets.ModelViewSet):
+    serializer_class = DiscussionSerializer
+    http_method_names = ['post', 'put', 'patch']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+        # Discussion - no superuser or wf_admin check
+        self.perform_create(serializer)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        # Discussion - no superuser or wf_admin check
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
 class PostAPI(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    http_method_names = ['get', 'head', 'post', 'put']
+    http_method_names = ['get', 'head']
 
     def get_queryset(self):
         body = self.request.query_params.get('body')
@@ -86,9 +117,37 @@ class PostAPI(viewsets.ModelViewSet):
         return Post.objects.all()
 
 
+class PostPostAPI(viewsets.ModelViewSet):
+    serializer_class = PostSerializer
+    http_method_names = ['post', 'put', 'patch']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+        # Post - no superuser or wf_admin check
+        self.perform_create(serializer)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        # Post - no superuser or wf_admin check
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
 class ReplyAPI(viewsets.ModelViewSet):
     serializer_class = ReplySerializer
-    http_method_names = ['get', 'head', 'post', 'put']
+    http_method_names = ['get', 'head']
 
     def get_queryset(self):
         body = self.request.query_params.get('body')
@@ -129,6 +188,35 @@ class ReplyAPI(viewsets.ModelViewSet):
         return Reply.objects.all()
 
 
+class ReplyPostAPI(viewsets.ModelViewSet):
+    serializer_class = ReplySerializer
+    http_method_names = ['post', 'put', 'patch']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        # Reply - no superuser or wf_admin check
+        self.perform_create(serializer)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        # Reply - no superuser or wf_admin check
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
 class MemberLikeOrFlagPostAPI(viewsets.ModelViewSet):
     serializer_class = MemberLikeOrFlagPostSerializer
     http_method_names = ['get', 'head', 'post', 'put']
@@ -157,10 +245,39 @@ class MemberLikeOrFlagPostAPI(viewsets.ModelViewSet):
             return MemberLikeOrFlagPost.objects.filter(**queryset_params)
         return MemberLikeOrFlagPost.objects.all()
 
+class MemberLikeOrFlagPostPostAPI(viewsets.ModelViewSet):
+    serializer_class = MemberLikeOrFlagPostSerializer
+    http_method_names = ['post', 'put', 'patch']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        if user.is_superuser or member_user.is_wf_admin:
+            self.perform_create(serializer)
+            return Response(serializer.data)
+        raise PermissionDenied()
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        if user.is_superuser or member_user.is_wf_admin:
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        raise PermissionDenied()
 
 class MemberLikeOrFlagReplyAPI(viewsets.ModelViewSet):
     serializer_class = MemberLikeOrFlagReplySerializer
-    http_method_names = ['get', 'head', 'post', 'put']
+    http_method_names = ['get', 'head']
 
     def get_queryset(self):
         flagged = self.request.query_params.get('flagged')  # bool
@@ -185,3 +302,33 @@ class MemberLikeOrFlagReplyAPI(viewsets.ModelViewSet):
         if queryset_params:
             return MemberLikeOrFlagReply.objects.filter(**queryset_params)
         return MemberLikeOrFlagReply.objects.all()
+
+class MemberLikeOrFlagReplyPostAPI(viewsets.ModelViewSet):
+    serializer_class = MemberLikeOrFlagReplySerializer
+    http_method_names = ['post', 'put', 'patch']
+    permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        if user.is_superuser or member_user.is_wf_admin:
+            self.perform_create(serializer)
+            return Response(serializer.data)
+        raise PermissionDenied()
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+
+        if user.is_superuser or member_user.is_wf_admin:
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        raise PermissionDenied()

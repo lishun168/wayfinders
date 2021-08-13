@@ -11,7 +11,9 @@ class Discussion(models.Model):
     created_by_string = models.CharField(max_length=255)
     sticky = models.BooleanField(default=False)
     likes = models.IntegerField(default=0)
+    liked = models.BooleanField(default=False)
     number_of_flags = models.IntegerField(default=0)
+    flagged = models.BooleanField(default=False)
 
     def __str__(self):
         return '%s' % (self.title)
@@ -29,6 +31,7 @@ class Post(models.Model):
     edited_at = models.DateTimeField(auto_now_add=True, auto_now=False)
     edited = models.BooleanField(default=False)
     likes = models.IntegerField(default=0)
+    liked = models.BooleanField(default=False)
     flagged = models.BooleanField(default=False)
     number_of_flags = models.IntegerField(default=0)
 
@@ -44,6 +47,7 @@ class Reply(models.Model):
     edited_at = models.DateTimeField(auto_now_add=True, auto_now=False)
     edited = models.BooleanField(default=False)
     likes = models.IntegerField(default=0)
+    liked = models.BooleanField(default=False)
     flagged = models.BooleanField(default=False)
     number_of_flags = models.IntegerField(default=0)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
@@ -82,7 +86,13 @@ class MemberLikeOrFlagReply(models.Model):
         verbose_name_plural='Members Like Replies'
 
 
+class UserFlagPost(models.Model):
+    user = models.ForeignKey(MemberUser, on_delete=models.CASCADE)
+    discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE)
+    flagged = models.BooleanField(default=False)
 
+    def __str__(self):
+        return '%s - %s : %s' % (self.discussion, self.user, self.flagged)
 
 
 

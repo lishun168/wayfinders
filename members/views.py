@@ -11,10 +11,10 @@ from login.views import LoginPermissionMixin
 from login.views import WFAdminPermissionMixin
 from django.core.exceptions import PermissionDenied 
 from django.http import HttpResponseRedirect
+from django.views.decorators import csrf
 from django.utils import timezone
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.forms import PasswordChangeForm
-from .mixin import FormsetMixin
 
 ##           FORMS              ##
 from .forms import ApplicationForm
@@ -25,7 +25,7 @@ from .forms import UpdateRoleForm
 ##                              ##
 
 ##           MODELS             ##
-from .models import MemberUser
+from .models import ApplicationUpload, MemberUser, UserFlagMember, UserFlagUser
 from .models import Member
 from .models import UserToMember
 from .models import UserRole
@@ -70,6 +70,7 @@ class UserProfile(LoginPermissionMixin, View):
         user_industries = UsertoIndustry.objects.filter(user=user)
         user_role = UserRole.objects.get(user=user)
         member_of = UserToMember.objects.filter(member_user=user)
+        participations = Participants.objects.filter(member=user, events__date__gte=timezone.now())[:5]
 
         context = {
             'profile': user,
@@ -78,8 +79,17 @@ class UserProfile(LoginPermissionMixin, View):
             'user_role': user_role,
             'calendar': calendar,
             'filters': filters,
-            'member_of': member_of
+            'member_of': member_of,
+            'participations': participations
         }
+
+        try:
+            current_user = MemberUser.objects.get(user=self.request.user)
+            user_flag_user = UserFlagUser.objects.get(flagged_user=user, user=current_user)
+            if user_flag_user.flagged == True:
+                context['flagged'] = True
+        except UserFlagUser.DoesNotExist:
+            context['flagged'] = False
 
         if request.user is not None:
             mId = request.user.pk
@@ -99,8 +109,6 @@ class UserProfile(LoginPermissionMixin, View):
                 context['admin'] = True
             else:
                 context['admin'] = False
-
-
         
         return render(request, self.template_name, context)
 
@@ -302,6 +310,14 @@ class MemberView(View):
             'upcoming_events': upcoming_events,
             'recent_events': recent_events
         }
+
+        try:
+            current_user = MemberUser.objects.get(user=self.request.user)
+            user_flag_member = UserFlagMember.objects.get(member=member, user=current_user)
+            if user_flag_member.flagged == True:
+                context['flagged'] = True
+        except UserFlagMember.DoesNotExist:
+            context['flagged'] = False
 
         if request.user.is_authenticated == True:
             user_member = MemberUser.objects.get(user=request.user.pk)
@@ -725,45 +741,46 @@ class UpdatePassword(PasswordChangeView):
     success_url = '/my_profile'
     form_class = PasswordChangeForm
 
-class Application(View):
-    template_name = 'members/application.html'
-    form_class = ApplicationForm
+class Application(CreateView):
+    template_name = 'create_edit_model.html'
+    model = ApplicationModel
+    fields = ('surname', 'first_name', 'email', 'title',
+    'business_name', 'business_website', 'address', 'city', 'province', 'postal_code',
+    'birthdate', 'phone_number', 'referred_by', 'other')
 
-    def get(self, request, *args, **kwargs):
-        form = ApplicationForm
-        context = {
-            'form': form
-        }
-        
-        return render(request, self.template_name, context)
+    def get_context_data(self, **kwargs):
+        context = super(Application, self).get_context_data(**kwargs)
+        context['button_text'] = 'Submit Application'
+        return context
 
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            # add field = form.cleaned_data['field_name']
-            name = form.cleaned_data['name']
-            email = form.cleaned_data['email']
-            organization_name = form.cleaned_data['organization_name']
-            organization_email = form.cleaned_data['organization_email']
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.save() 
+        messages.add_message(self.request, messages.SUCCESS, "Thank you for the application. Someone from Wayfinders will follow up with you soon")
+        return HttpResponseRedirect('/')
 
-            #application.field_name = field_name
-            application = ApplicationModel()
-            application.name = name
-            application.email = email
-            application.org_name = organization_name
-            application.org_email = organization_email
-            application.save()
+    def form_invalid(self, form):
+        messages.add_message(self.request, messages.ERROR, "Please correct the form below.")
+        return super().form_invalid(form)
 
-            return HttpResponseRedirect('/submission')
-        messages.add_message(request, messages.ERROR, "Please correct the form below.")
-        return render(request, self.template_name, {'form': form})
-
-
-class ApplicationSubmission(View):
-    template_name = "members/application_submission.html"
+class ApplicationSubmission(CreateView):
+    template_name = 'create_edit_model.html'
+    model = ApplicationUpload
+    fields = ('file',)
     
-    def get(self, request):
-        return render(request, self.template_name, {})
+
+    def get_context_data(self, **kwargs):
+        context = super(ApplicationSubmission, self).get_context_data(**kwargs)
+        context['button_text'] = 'Submit'
+        return context
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.save()
+
+        messages.add_message(self.request, messages.SUCCESS, "Thank you for the application. Someone from Wayfinders will follow up with you soon")
+        success_url = '/'
+        return HttpResponseRedirect(success_url)
 
 class ApplicationChoice(View):
     template_name = 'members/application_choice.html'
@@ -771,4 +788,179 @@ class ApplicationChoice(View):
     def get(self, request):
         return render(request, self.template_name)
 
+class ApplicationView(View):
+    template_name = 'members/application_view.html'
 
+    def get(self, request):
+        applications = ApplicationModel.objects.all()
+        context = {
+            'applications': applications
+        }
+        
+        return render(request, self.template_name, context)
+
+class ApplicationDetails(View):
+    template_name = 'members/application_details.html'
+
+    def get(self, request, pk):
+        application = ApplicationModel.objects.get(pk=pk)
+        context = {
+            'application': application
+        }
+        
+        return render(request, self.template_name, context)
+
+
+class ApplicationFiles(View):
+    template_name = 'members/application_files.html'
+
+    def get(self, request):
+        applications = ApplicationUpload.objects.all()
+        context = {
+            'applications': applications
+        }
+        
+        return render(request, self.template_name, context)
+
+class ApplicationSubmit(View):
+    def post(self, request, pk, approved, *args, **kwargs):
+        success_url = "/application_directory"
+        application = ApplicationModel.objects.get(pk=pk)
+        application.processed = True
+
+        if approved == "true":
+            application.approved = True
+
+        application.save()
+       
+        return HttpResponseRedirect(success_url)
+
+class ViewApplications(View):
+    template_name = 'members/applications.html'
+
+    def get(self, request):
+        applications = ApplicationModel.objects.all().order_by('-date')
+
+        context = {
+            'applications': applications
+        }
+
+        return render(request, self.template_name, context)
+
+class ViewApplicationUploads(View):
+    template_name = 'members/applications.html'
+
+    def get(self, request):
+        applications = ApplicationUpload.objects.all().order_by('-date')
+
+        context = {
+            'application_uploads': applications
+        }
+
+        return render(request, self.template_name, context)
+
+class ApplicationFileDetails(View):
+    template_name = 'members/application_file.html'
+
+    def get(self, request, pk):
+        application = ApplicationUpload.objects.get(pk=pk)
+
+        context = {
+            'application': application
+        }
+
+        return render(request, self.template_name, context)
+
+class ApplicationFileSubmit(View):
+    def post(self, request, pk, approved, *args, **kwargs):
+            success_url = "/application_files"
+            application = ApplicationUpload.objects.get(pk=pk)
+            application.processed = True
+
+            if approved == "true":
+                application.approved = True
+
+            application.save()
+        
+            return HttpResponseRedirect(success_url)
+
+
+class ViewFlaggedUsers(View):
+    template_name = 'members/user_flags.html'
+
+    def get(self, request):
+        users = MemberUser.objects.filter(number_of_flags__gt=0).distinct().order_by('number_of_flags')
+
+        context = {
+            'users': users
+        }
+
+        return render(request, self.template_name, context)
+
+class ViewFlaggedMembers(View):
+    template_name = 'members/user_flags.html'
+
+    def get(self, request):
+        members = Member.objects.filter(number_of_flags__gt=0).distinct().order_by('number_of_flags')
+
+        context = {
+            'members': members
+        }
+
+        return render(request, self.template_name, context)
+
+
+@csrf.csrf_exempt
+def flag_user(request, member_pk, flagged_member_pk):
+    member = MemberUser.objects.get(pk=member_pk)
+    flagged_member = MemberUser.objects.get(pk=flagged_member_pk)
+    try:
+        user_flag_user = UserFlagUser.objects.get(user=member, flagged_user=flagged_member)
+        if user_flag_user.flagged is True:
+            user_flag_user.flagged = False
+            flagged_member.number_of_flags -=1
+        else:
+            user_flag_user.flagged = True
+            flagged_member.number_of_flags += 1
+        flagged_member.save()
+        user_flag_user.save()
+    except UserFlagUser.DoesNotExist:
+        user_flag_user = UserFlagUser()
+        user_flag_user.flagged = True
+        user_flag_user.user = member
+        user_flag_user.flagged_user = flagged_member_pk
+        user_flag_user.save()
+
+        flagged_member.number_of_flags += 1
+        flagged_member.save()
+
+    success_url = "/profile/" + str(flagged_member_pk)
+    return HttpResponseRedirect(success_url)
+
+
+@csrf.csrf_exempt
+def flag_member(request, member_pk, flagged_member_pk):
+    member = MemberUser.objects.get(pk=member_pk)
+    flagged_member = Member.objects.get(pk=flagged_member_pk)
+    try:
+        user_flag_member = UserFlagMember.objects.get(user=member, member=flagged_member)
+        if user_flag_member.flagged is True:
+            user_flag_member.flagged = False
+            flagged_member.number_of_flags -=1
+        else:
+            user_flag_member.flagged = True
+            flagged_member.number_of_flags += 1
+        flagged_member.save()
+        user_flag_member.save()
+    except UserFlagMember.DoesNotExist:
+        user_flag_member = UserFlagMember()
+        user_flag_member.flagged = True
+        user_flag_member.user = member
+        user_flag_member.member = flagged_member
+        user_flag_member.save()
+
+        flagged_member.number_of_flags += 1
+        flagged_member.save()
+
+    success_url = "/member/" + str(flagged_member_pk)
+    return HttpResponseRedirect(success_url)

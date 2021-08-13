@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>Applications</h1>
+
+    {% for application in applications %}
+        <table>
+            <tr>
+                <td><a href="/application/{{application.pk}}"> <div> {{application.business_name}}</div></a></td>
+                <td> Processed: {{application.processed}} </td>
+                <td> {% if application.approved %} Approved {% else %} Denied {% endif %}
+                <td> {{application.date}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+    {% for application in application_uploads %}
+        <table>
+            <tr>
+                <td><a href="/application_file/{{application.pk}}"> <div> {{application.file}}</div></a></td>
+                <td> Processed: {{application.processed}} </td>
+                <td> {% if application.approved %} Approved {% else %} Denied {% endif %}
+                <td> {{application.date}} </td>
+            </tr>
+        <table>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+   
+
+{% endblock %}

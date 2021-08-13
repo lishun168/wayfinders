@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="section">
+    <h1>{{application.business_name}}</h1>
+
+    <table>
+    <tr>
+             <td>
+                <b>Date of Application: </b>
+            </td>
+            <td>
+                <div>{{application.date}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Surname: </b>
+            </td>
+            <td>
+                <div>{{application.surname}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>First Name: </b>
+            </td>
+            <td>
+                <div>{{application.first_name}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Email: </b>
+            </td>
+            <td>
+                <div>{{application.email}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Title: </b>
+            </td>
+            <td>
+                <div>{{application.title}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Business Website: </b>
+            </td>
+            <td>
+                <div>{{application.business_website}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Address: </b>
+            </td>
+            <td>
+                <div>{{application.address}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>City: </b>
+            </td>
+            <td>
+                <div>{{application.city}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Province: </b>
+            </td>
+            <td>
+                <div>{{application.province}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Postal Code</b>
+            </td>
+            <td>
+                <div>{{application.postal_code}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Birthdate: </b>
+            </td>
+            <td>
+                <div>{{application.birthdate}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Phone Number: </b>
+            </td>
+            <td>
+                <div>{{application.phone_number}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Referred By: </b>
+            </td>
+            <td>
+                <div>{{application.referred_by}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Other: </b>
+            </td>
+            <td>
+                <div>{{application.other}}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Processed: </b>
+            </td>
+            <td>
+                <div>{{application.processed }}</div>
+            </td>
+        </tr>
+        <tr>
+             <td>
+                <b>Approved: </b>
+            </td>
+            <td>
+                <div>{{application.approved}}</div>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="button_container">
+    <form action="/process_application/{{application.pk}}/true" method="POST">
+    {% csrf_token %} 
+        <input class="btn btn-primary" type="submit" value="Approve" />
+    </form>
+    <form action="/process_application/{{application.pk}}/false" method="POST">
+    {% csrf_token %} 
+        <input class="btn btn-primary" type="submit" value="Deny" />
+    </form>
+</div>
+
+{% endblock %}
+
+{% block head %}
+{{ block.super }}
+
+    <title>
+        Wayfinders {% block title %}{% endblock %}
+    </title>
+
+    {# favicon #}
+    <link href="#" rel="icon" type="image/x-icon" />
+
+{% endblock %}

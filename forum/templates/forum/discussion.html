@@ -49,14 +49,23 @@
                     </div>
                    <div class="post_sub_footer">
                        <div class="like_button">
-                            <a href="/like/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/thumbs_up.png' %}" width="25" height="25"></div></a>
+                            {% if post.liked %}
+                                <a href="/like/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/thumbs_up.png' %}" width="25" height="25"></div></a>
+                            {% else %}
+                                <a href="/like/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/thumbs_up_empty.png' %}" width="25" height="25"></div></a>
+                            {% endif %}
                        </div>
                        <div>
                            {{post.likes}}
                        </div>
                        <div class="text_button flag_button" >
-                            <a href="/flag/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
-                       </div>
+                            {% if post.flagged %}
+                                <a href="/flag/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/flag_filled.png' %}" width="25" height="25"></div></a>
+                       
+                            {% else %}
+                                <a href="/flag/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
+                        {% endif %}
+                             </div>
                        <div class="text_button"> <a href="/forum/reply/{{post.thread.pk}}/{{post.pk}}">REPLY</a></div>
                    </div>  
                 </div>

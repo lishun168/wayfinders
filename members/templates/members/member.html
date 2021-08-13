@@ -24,6 +24,13 @@
             <div class="title_bar">
                 <h3>{{member.name}}</h3>
             </div>
+            <div>
+                {% if flagged %}
+                    <a href="/flag_member/{{user.pk}}/{{member.pk}}"><div class="right-side"><img src="{%static 'members/img/flag_filled.png' %}" width="25" height="25"></div></a>
+                {% else %}
+                    <a href="/flag_member/{{user.pk}}/{{member.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
+                {% endif %}
+            </div>
             <div class="inline charm-bar">
                 {% if member.logo.url != None %}
                 <img src="{{member.logo.url}}" width="60" height="60" style="object-fit: contain; object-position: left top;">
@@ -108,7 +115,10 @@
         </div>
         {% endif %}
         {% for skill in member_skills %}
-            <div><a href="/skill/{{skill.skill.pk}}">{{skill.skill.name}}</a></div>
+                 <div class="inline">
+                    <div><a href="/skill/{{skill.skill.pk}}">{{skill.skill.name}}</a></div>
+                    <a href="/remove_skill_member/{{skill.pk}}/{{member.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                </div>            
         {% endfor %}
     </div>
 
@@ -126,7 +136,10 @@
         </div>
         {% endif %}
         {% for industry in member_industries %}
-            <div><a href="/industry/{{industry.industry.pk}}">{{industry.industry.name}}</a></div>
+                <div class="inline">
+                    <div><a href="/industry/{{industry.industry.pk}}">{{industry.industry.name}}</a></div>
+                    <a href="/remove_industry_member/{{industry.pk}}/{{member.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                </div>
         {% endfor %}
     </div>
     <div class="profile_section">

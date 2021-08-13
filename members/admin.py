@@ -1,11 +1,13 @@
 from django.contrib import admin
 
-from .models import Application, Member
+from .models import Application, UserFlagMember, UserFlagUser
+from .models import Member
 from .models import MemberUser
 from .models import UserRole
 from .models import Permissions
 from .models import Gallery
 from .models import UserToMember
+from .models import ApplicationUpload
 from skills.models import MemberToSkills
 from skills.models import UserToSkills
 from cal.models import Calendar
@@ -49,6 +51,8 @@ admin.site.register(UserRole)
 admin.site.register(Permissions, PermissionsAdmin)
 admin.site.register(Gallery)
 admin.site.register(Application)
-#admin.site.register(FileUploadApplication)
+admin.site.register(ApplicationUpload)
+admin.site.register(UserFlagUser)
+admin.site.register(UserFlagMember)
 
 

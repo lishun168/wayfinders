@@ -3,7 +3,7 @@ from login.views import LoginPermissionMixin
 from django.core.exceptions import PermissionDenied 
 from django.http import HttpResponseRedirect
 from django.views import View
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import DeleteView, UpdateView
 from django.views.generic.edit import CreateView
 from django.contrib import messages
 
@@ -201,11 +201,58 @@ class UploadSkills(LoginPermissionMixin, View):
             io_string = io.StringIO(decoded_file)
 
             for line in csv.reader(io_string, delimiter=","):
-                skill = Skill()
-                skill.name = line[0]
-                skill.description = line[1]
-                skill.save()
+                skill_name = line[0]
+                count = Skill.objects.filter(name=skill_name).count()
+                if count == 0:
+                    skill = Skill()
+                    skill.name = skill_name
+                    skill.description = line[1]
+                    skill.save()
 
         messages.add_message(request, messages.SUCCESS, "Your file has been uploaded successfully")
         return HttpResponseRedirect('/upload_skills')
+
+class RemoveSkillFromUser(LoginPermissionMixin, DeleteView):
+    template_name = 'create_edit_model.html'
+    model = UserToSkills
+
+    def get_context_data(self, **kwargs):
+        context = super(RemoveSkillFromUser, self).get_context_data(**kwargs)
+        context['button_text'] = 'Remove Skill'
+        return context
+    
+    def dispatch(self, *args, **kwargs):
+        return super(RemoveSkillFromUser, self).dispatch(*args, **kwargs)
+    
+    def delete(self, request, *arg, **kwargs):
+        pk = self.kwargs.get('pk')
+        user_pk = self.kwargs.get('user_pk')
+        
+        participant = UserToSkills.objects.get(pk=pk)
+        participant.delete()
+
+        success_url = "/profile/" + str(user_pk)
+        return HttpResponseRedirect(success_url )
+
+class RemoveSkillFromMember(LoginPermissionMixin, DeleteView):
+    template_name = 'create_edit_model.html'
+    model = MemberToSkills
+
+    def get_context_data(self, **kwargs):
+        context = super(RemoveSkillFromMember, self).get_context_data(**kwargs)
+        context['button_text'] = 'Remove Skill'
+        return context
+    
+    def dispatch(self, *args, **kwargs):
+        return super(RemoveSkillFromMember, self).dispatch(*args, **kwargs)
+    
+    def delete(self, request, *arg, **kwargs):
+        pk = self.kwargs.get('pk')
+        member_pk = self.kwargs.get('member_pk')
+        
+        participant = UserToMember.objects.get(pk=pk)
+        participant.delete()
+
+        success_url = "/member/" + str(member_pk)
+        return HttpResponseRedirect(success_url)
     
