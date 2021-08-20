@@ -11,7 +11,7 @@
             <tr>
                 <td><a href="/application/{{application.pk}}"> <div> {{application.business_name}}</div></a></td>
                 <td> Processed: {{application.processed}} </td>
-                <td> {% if application.approved %} Approved {% else %} Denied {% endif %}
+                <td> {% if application.approved %} Approved {% elif application.approved == False and application.processed == False %}Pending {% else %} Denied {% endif %}
                 <td> {{application.date}} </td>
             </tr>
         <table>
@@ -21,7 +21,7 @@
             <tr>
                 <td><a href="/application_file/{{application.pk}}"> <div> {{application.file}}</div></a></td>
                 <td> Processed: {{application.processed}} </td>
-                <td> {% if application.approved %} Approved {% else %} Denied {% endif %}
+                <td> {% if application.approved %} Approved {% elif application.approved == False and application.processed == False %}Pending{% else %} Denied {% endif %}
                 <td> {{application.date}} </td>
             </tr>
         <table>

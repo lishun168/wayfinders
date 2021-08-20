@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from search.models import SearchObject
 from phonenumber_field.modelfields import PhoneNumberField
-from django.utils.timezone import now
+from datetime import datetime
 
 class Member(models.Model):
     name = models.CharField(max_length=255)
@@ -130,9 +130,9 @@ class Application(models.Model):
     postal_code = models.CharField(max_length=255, blank=True, null=True)
     birthdate = models.CharField(max_length=255, blank=True, null=True)
     phone_number = PhoneNumberField()
-    referred_by = models.CharField(max_length=255)
-    other = models.TextField()
-    date = models.DateField(now())
+    referred_by = models.CharField(max_length=255, blank=True, null=True)
+    other = models.TextField(blank=True, null=True)
+    date = models.DateField(default=datetime.now())
     processed = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
 
@@ -145,7 +145,7 @@ class Application(models.Model):
 
 class ApplicationUpload(models.Model):
     file = models.FileField(upload_to="application_file")
-    date = models.DateField(now())
+    date = models.DateField(default=datetime.now())
     processed = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
 

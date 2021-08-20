@@ -62,7 +62,7 @@ def login_view(request):
                 return HttpResponseRedirect("/admin")
             return HttpResponseRedirect(cal_url)
         except MemberUser.DoesNotExist:
-            return HttpResponseRedirect("/create_profile")
+            return HttpResponseRedirect("/  ")
     else:
         messages.add_message(request, messages.ERROR, "Your username and/or password is incorrect.")
         return HttpResponseRedirect('/login_page')

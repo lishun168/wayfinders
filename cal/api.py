@@ -1,6 +1,7 @@
 from requests import Response
 from rest_framework import viewsets, permissions
 from rest_framework.exceptions import PermissionDenied
+
 from members.models import MemberUser
 from .models import Calendar
 from .models import Filter
@@ -10,7 +11,8 @@ from wayfinders.functions import add_to_queryset
 
 class CalendarAPI(viewsets.ModelViewSet):
     serializer_class = CalendarSerializer
-    http_method_names = ['get', 'head']
+    http_method_names = ['get', 'head', 'post', 'patch']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         public = self.request.query_params.get('public')  # bool
@@ -32,18 +34,14 @@ class CalendarAPI(viewsets.ModelViewSet):
             return Calendar.objects.filter(**queryset_params)
         return Calendar.objects.all()
 
-class CalendarPostAPI(viewsets.ModelViewSet):
-    serializer_class = CalendarSerializer
-    http_method_names = ['post', 'put', 'patch']
-    permission_classes = [permissions.IsAuthenticated]
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if user.is_superuser or member_user.is_wf_admin:
+        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -56,14 +54,15 @@ class CalendarPostAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if user.is_superuser or member_user.is_wf_admin:
+        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
 
 class FilterAPI(viewsets.ModelViewSet):
     serializer_class = FilterSerializer
-    http_method_names = ['get', 'head']
+    http_method_names = ['get', 'head', 'post', 'patch']
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
@@ -77,18 +76,14 @@ class FilterAPI(viewsets.ModelViewSet):
             return Filter.objects.filter(**queryset_params)
         return Filter.objects.all()
 
-class FilterPostAPI(viewsets.ModelViewSet):
-    serializer_class = FilterSerializer
-    http_method_names = ['post', 'put', 'patch']
-    permission_classes = [permissions.IsAuthenticated]
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if user.is_superuser or member_user.is_wf_admin:
+        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -101,7 +96,7 @@ class FilterPostAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if user.is_superuser or member_user.is_wf_admin:
+        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()

@@ -753,6 +753,13 @@ class Application(CreateView):
         context['button_text'] = 'Submit Application'
         return context
 
+    def get_form(self, form_class=None):
+        form = super(Application, self).get_form(form_class)
+        form.fields['surname'].required = True
+        form.fields['first_name'].required = True
+        form.fields['phone_number'].required = True
+        return form
+
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.save() 

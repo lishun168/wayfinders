@@ -19,13 +19,11 @@ from django.contrib.staticfiles.urls import static
 from django.core.exceptions import ViewDoesNotExist
 from rest_framework import routers
 
-from cal.api import CalendarAPI, FilterAPI, CalendarPostAPI, FilterPostAPI
-from events.api import EventAPI, InvitationAPI, ParticipantsAPI, GuestParticipantAPI, EventPostAPI, InvitationPostAPI, \
-    ParticipantsPostAPI, GuestParticipantPostAPI
-from forum.api import DiscussionAPI, PostAPI, ReplyAPI, MemberLikeOrFlagPostAPI, MemberLikeOrFlagReplyAPI, \
-    DiscussionPostAPI, PostPostAPI, ReplyPostAPI, MemberLikeOrFlagPostPostAPI, MemberLikeOrFlagReplyPostAPI
-from groups.api import GroupsAPI, RulesAPI, GroupToMemberAPI, GroupsPostAPI, RulesPostAPI, GroupToMemberPostAPI
-from search.api import SearchObjectAPI, SearchTagsAPI, SearchObjectPostAPI, SearchTagsPostAPI
+from cal.api import CalendarAPI, FilterAPI
+from events.api import EventAPI, InvitationAPI, ParticipantsAPI, GuestParticipantAPI
+from forum.api import DiscussionAPI, PostAPI, ReplyAPI, MemberLikeOrFlagReplyAPI
+from groups.api import GroupsAPI, RulesAPI, GroupToMemberAPI
+from search.api import SearchObjectAPI, SearchTagsAPI
 from . import settings
 from django.urls import path
 from django.urls import include
@@ -119,20 +117,17 @@ from events.views import CreateParticipant
 from events.views import RemoveParticipant
 from search.views import Search
 
-from members.api import MemberAPI, UserToMemberPostAPI, PermissionsPostAPI, UserRolePostAPI, GalleryPostAPI, \
-    ApplicationPostAPI
+from members.api import MemberAPI
 from members.api import UserToMemberAPI
 from members.api import PermissionsAPI
 from members.api import UserRoleAPI
 from members.api import GalleryAPI
 from members.api import ApplicationAPI
 from members.api import MemberUserAPI
-from members.api import MemberPostAPI
-from members.api import MemberUserPostAPI
-from skills.api import SkillAPI, SkillPostAPI, MemberToSkillsPostAPI, UserToSkillsPostAPI
+from skills.api import SkillAPI
 from skills.api import MemberToSkillsAPI
 from skills.api import UserToSkillsAPI
-from industries.api import IndustryAPI, IndustryPostAPI, MemberToIndustryPostAPI, UsertoIndustryPostAPI
+from industries.api import IndustryAPI
 from industries.api import MemberToIndustryAPI
 from industries.api import UsertoIndustryAPI
 from search.api import SearchObjectAPI
@@ -143,7 +138,6 @@ from groups.api import GroupToMemberAPI
 from forum.api import DiscussionAPI
 from forum.api import PostAPI
 from forum.api import ReplyAPI
-from forum.api import MemberLikeOrFlagPostAPI
 from forum.api import MemberLikeOrFlagReplyAPI
 from events.api import EventAPI
 from events.api import InvitationAPI
@@ -156,9 +150,7 @@ from cal.api import FilterAPI
 router = routers.DefaultRouter()
 # From Member application(7)
 router.register('api/members', MemberAPI, 'api/members')
-router.register('api/members_post', MemberPostAPI, 'api/members_post')
 router.register('api/member_users', MemberUserAPI, 'api/member_users')
-router.register('api/members_users_post', MemberUserPostAPI, 'api/member_users_post')
 router.register('api/users_members', UserToMemberAPI, 'api/users_members')
 router.register('api/permissions', PermissionsAPI, 'api/permissions')
 router.register('api/user_role', UserRoleAPI, 'api/member_users')
@@ -183,7 +175,6 @@ router.register('api/group_member', GroupToMemberAPI, 'api/group_member')
 router.register('api/discussion', DiscussionAPI, 'api/discussion')
 router.register('api/post', PostAPI, 'api/post')
 router.register('api/reply', ReplyAPI, 'api/reply')
-router.register('api/member_like_or_flag_post', MemberLikeOrFlagPostAPI, 'api/member_like_or_flag_post')
 router.register('api/member_like_or_flag_reply', MemberLikeOrFlagReplyAPI, 'api/member_like_or_flag_reply')
 # From Event application(4)
 router.register('api/event', EventAPI, 'api/event')
@@ -193,47 +184,6 @@ router.register('api/guest_participant', GuestParticipantAPI, 'api/guest_partici
 # From Cal application(8)
 router.register('api/calendar', CalendarAPI, 'api/calendar')
 router.register('api/filter', FilterAPI, 'api/filter')
-
-router.register('api/calendar_post', CalendarPostAPI, 'api/calendar_post')
-
-# members:
-router.register('api/Member_post', MemberPostAPI, 'api/Member_post')
-router.register('api/MemberUser_post', MemberUserPostAPI, 'api/MemberUser_post')
-router.register('api/UserToMember_post', UserToMemberPostAPI, 'api/UserToMember_post')
-router.register('api/Permissions_post', PermissionsPostAPI, 'api/Permissions_post')
-router.register('api/UserRole_post', UserRolePostAPI, 'api/UserRole_post')
-router.register('api/Gallery_post', GalleryPostAPI, 'api/Gallery_post')
-router.register('api/Application_post', ApplicationPostAPI, 'api/Application_post')
-# cal:
-router.register('api/calendar_post', CalendarPostAPI, 'api/calendar_post')
-router.register('api/Filter_post', FilterPostAPI, 'api/Filter_post')
-# forum:
-router.register('api/Discussion_post', DiscussionPostAPI, 'api/Discussion_post')
-router.register('api/Post_post', PostPostAPI, 'api/Post_post')
-router.register('api/Reply_post', ReplyPostAPI, 'api/Reply_post')
-router.register('api/MemberLikeOrFlagPostPost_post', MemberLikeOrFlagPostPostAPI, 'api/MemberLikeOrFlagPostPost_post')
-router.register('api/MemberLikeOrFlagReply_post', MemberLikeOrFlagReplyPostAPI, 'api/MemberLikeOrFlagReply_post')
-# event:
-router.register('api/Event_post', EventPostAPI, 'api/Event_post')
-router.register('api/Invitation_post', InvitationPostAPI, 'api/Invitation_post')
-router.register('api/Participants_post', ParticipantsPostAPI, 'api/Participants_post')
-router.register('api/GuestParticipant_post', GuestParticipantPostAPI, 'api/GuestParticipant_post')
-# groups:
-router.register('api/Groups_post', GroupsPostAPI, 'api/Groups_post')
-router.register('api/Rules_post', RulesPostAPI, 'api/Rules_post')
-router.register('api/GroupToMember_post', GroupToMemberPostAPI, 'api/GroupToMember_post')
-# Industry:
-router.register('api/Industry_post', IndustryPostAPI, 'api/Industry_post')
-router.register('api/MemberToIndustry_post', MemberToIndustryPostAPI, 'api/MemberToIndustry_post')
-router.register('api/UsertoIndustry_post', UsertoIndustryPostAPI, 'api/UsertoIndustry_post')
-# search:
-router.register('api/SearchObject_post', SearchObjectPostAPI, 'api/SearchObject_post')
-router.register('api/SearchTags_post', SearchTagsPostAPI, 'api/SearchTags_post')
-# skills:
-router.register('api/Skill_post', SkillPostAPI, 'api/Skill_post')
-router.register('api/MemberToSkills_post', MemberToSkillsPostAPI, 'api/MemberToSkills_post')
-router.register('api/UserToSkills_post', UserToSkillsPostAPI, 'api/UserToSkills_post')
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),

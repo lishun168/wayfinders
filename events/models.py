@@ -19,7 +19,7 @@ class Event(models.Model):
     time = models.TimeField(u'Start Time')
     end_time = models.TimeField(u'End Time')
     sub_calendar = models.ForeignKey(Filter, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Calendar")
-    public = models.BooleanField(default=True)
+    public = models.BooleanField('Visible to Public', default=True)
     is_open = models.BooleanField(u'Open to Public', default=False)
     open_editing = models.BooleanField(u'Public can Edit', default=False)
     search_tag = models.ForeignKey(SearchObject, on_delete=models.SET_NULL, blank=True, null=True)

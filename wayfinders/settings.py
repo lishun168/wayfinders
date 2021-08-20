@@ -26,7 +26,7 @@ SECRET_KEY = 'k_q1^a6g03$q=uph@#41r1!(55!r5&yet5kqc6e1y=1057u9%*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
-ALLOWED_HOSTS = ['http://161.35.0.38/', '161.35.0.38', '127.0.0.1', 'https://uat.wayfinders.tk/', 'localhost']
+ALLOWED_HOSTS = ['http://161.35.0.38/', '161.35.0.38', '127.0.0.1', 'https://uat.wayfinders.tk/']
 
 
 # Application definition
