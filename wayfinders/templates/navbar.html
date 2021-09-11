@@ -13,7 +13,7 @@
         <div id="navbarNav" >
 
                 {% if request.user.is_superuser %}
-                <div class="navbarNav-item dropbtn admin" onClick="adminFlagDrop()"> Admin Flags</div>
+                <div id="admin-flag-button" class="navbarNav-item dropbtn admin" onClick="adminFlagDrop()"> Admin Flags</div>
                 <div id="admin-flag-dropdown" class="dropdown-content dropdown-menu-right hide">
                     <a href="/view_flagged_discussions">Forum Flags</a>
                     <a href="/view_flagged_users">User Flags</a>
@@ -23,18 +23,21 @@
                 </div>
                 <div class="navbarNav-item"><a class="nav-link" href="/applications">Online Applications</a></div>
                 <div class="navbarNav-item"><a class="nav-link" href="/application_files">File Applications</a></div>
-                <div class="navbarNav-item dropbtn admin" onClick="adminDrop()"> Admin (Admin)</div>
+                <div id="admin-button" class="navbarNav-item dropbtn admin" onClick="adminDrop()"> Admin (Admin)</div>
                 <div id="admin-dropdown" class="dropdown-content dropdown-menu-right hide">
                     <a href="/admin">Admin Site</a>
-                    <a href="/create_member_choice">Add Member</a>
+                    <a href="/create_member">Add Member</a>
+                    <a href="/create_member_choice">Add Member User</a>
                     <a href="/upload_skills">Upload Skills</a>
                     <a href="/upload_industries">Upload Industries</a>
                 </div>
                 {% endif %}
                 <div class="navbarNav-item"><a class="nav-link" href="/members">Members</a></div>
-                <div class="navbarNav-item"><a class="nav-link" href="/forum">Discussions</a></div>
                 {% if user.is_authenticated %}
-                <div class="navbarNav-item dropbtn" onClick="profileDrop()">
+                    <div class="navbarNav-item"><a class="nav-link" href="/forum">Discussions</a></div>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <div id="profile-button" class="navbarNav-item dropbtn admin" onClick="profileDrop()">
                     <img src="{%static 'members/img/account.png' %}" height="30" width="30">
                 </div>
                 <div id="profile-dropdown" class="dropdown-content dropdown-menu-right hide">
@@ -115,7 +118,7 @@
     }
 
     #admin-dropdown {
-        margin-top: 255px;
+        margin-top: 300px;
         right: 250;
         position: absolute;
         z-index: 1;
@@ -154,18 +157,43 @@
 </style>
 
 <script>
-/* When the user clicks on the button, 
-toggle between hiding and showing the dropdown content */
-function profileDrop() {
-  document.getElementById("profile-dropdown").classList.toggle("hide");
-}
+    function profileDrop() {
+    document.getElementById("profile-dropdown").classList.toggle("hide");
+    }
 
-function adminDrop() {
-  document.getElementById("admin-dropdown").classList.toggle("hide");
-}
+    function adminDrop() {
+    document.getElementById("admin-dropdown").classList.toggle("hide");
+    }
 
-function adminFlagDrop() {
-  document.getElementById("admin-flag-dropdown").classList.toggle("hide");
-}
+    function adminFlagDrop() {
+        document.getElementById("admin-flag-dropdown").classList.toggle("hide");
+    }
 
+    $(document).mouseup(function(e) 
+    {
+        const adminButton = $('#admin-button');
+        const adminFlagButton = $('#admin-flag-button');
+        const profileButton = $('#profile-button');
+        const profileDrop = document.getElementById("profile-dropdown");
+        const adminDrop = document.getElementById("admin-dropdown");
+        const adminFlagDrop = document.getElementById("admin-flag-dropdown");
+
+        if(!adminButton.is(e.target)){
+            if($(adminDrop).is(':visible')){
+                (adminDrop).classList.toggle("hide");
+            }
+        }
+
+        if(!profileButton.is(e.target) && !profileButton.children('img').eq(0).is(e.target)){
+            if($(profileDrop).is(':visible')){
+                (profileDrop).classList.toggle("hide");
+            }
+        }
+
+        if(!adminFlagButton.is(e.target)){
+            if($(adminFlagDrop).is(':visible')){
+                (adminFlagDrop).classList.toggle("hide");
+            }
+        }
+    });
 </script>

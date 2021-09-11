@@ -43,13 +43,13 @@
         {% for invitation in invitations %}
             <b>{{invitation.member}}</b> - 
             {% if invitation.accept == True %}
-            Accepted
+            Accepted <br>
             {% endif %}
             {% if invitation.decline == True %} 
-            Declined
+            Declined <br>
             {% endif %}
             {% if invitation.accept == False and invitation.decline == False %}
-            Pending
+            Pending <br>
             {% endif %}
         {% endfor %}
     </div>
@@ -57,15 +57,19 @@
     <div class="events_details">
         <div class="inline">
             <div class="subtitle">Participants:</div>
-            <div class="edit_img"><a href="/add_participant/{{event.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> </a></div> 
+            {% if admin %}
+                <div class="edit_img"><a href="/add_participant/{{event.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> </a></div> 
+            {% endif %}
         </div>
         
         {% for participant in participants %}
             
             <div>
                 <div class="inline">
-                    <a href="/profile/{{participant.member.pk}}"><b>{{participant.member}}</b></a> 
-                    <div class="edit_img"><a href="/remove_participant/{{participant.pk}}/{{event.pk}}" > <img src="{%static 'members/img/close.png' %}" height="16" width="16"> </a></div> 
+                    <a href="/profile/{{participant.member.pk}}"><b>{{participant.member}}</b></a>
+                    {% if admin %}
+                        <div class="edit_img"><a href="/remove_participant/{{participant.pk}}/{{event.pk}}" > <img src="{%static 'members/img/close.png' %}" height="16" width="16"> </a></div> 
+                    {% endif %}
                 </div>
                 {% if my_part == True %}
                     {% if participant.is_administrator == False and admin == True %}

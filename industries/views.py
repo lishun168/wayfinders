@@ -23,7 +23,7 @@ from members.models import UserRole
 import logging
 logger = logging.getLogger(__name__)
 
-class ViewIndustry(LoginPermissionMixin, View):
+class ViewIndustry(View):
     template_name = 'industries/industry.html'
 
     def get(self, request, pk):

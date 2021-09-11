@@ -136,7 +136,7 @@ class AddMemberSkill(LoginPermissionMixin, CreateView):
         success_url = "/member/" + str(member_pk)
         return HttpResponseRedirect(success_url)
 
-class ViewSkill(LoginPermissionMixin, View):
+class ViewSkill(View):
     template_name = 'skills/skill.html'
 
     def get(self, request, pk):

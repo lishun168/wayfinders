@@ -2,11 +2,13 @@ from rest_framework import viewsets
 from .models import Discussion
 from .models import Post
 from .models import Reply
+from .models import MemberLikeOrFlagPost
 from .models import MemberLikeOrFlagReply
 from members.models import MemberUser
 from .serializers import DiscussionSerializer
 from .serializers import PostSerializer
 from .serializers import ReplySerializer
+from .serializers import MemberLikeOrFlagPostSerializer
 from .serializers import MemberLikeOrFlagReplySerializer
 from wayfinders.functions import add_to_queryset
 from rest_framework import permissions
@@ -58,7 +60,8 @@ class DiscussionAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
+        # no superuser or wf_admin check
+        if member_user.id == request.data.get('created_by'):
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -71,7 +74,8 @@ class DiscussionAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
+        # no superuser or wf_admin check
+        if member_user == instance.created_by:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -79,8 +83,7 @@ class DiscussionAPI(viewsets.ModelViewSet):
 
 class PostAPI(viewsets.ModelViewSet):
     serializer_class = PostSerializer
-    http_method_names = ['get', 'head', 'post', 'patch']
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    http_method_names = ['get', 'head', 'post', 'put']
 
     def get_queryset(self):
         body = self.request.query_params.get('body')
@@ -125,7 +128,8 @@ class PostAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
+        # no superuser or wf_admin check
+        if member_user.id == request.data.get('created_by'):
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -138,7 +142,8 @@ class PostAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
+        # no superuser or wf_admin check
+        if member_user == instance.created_by:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -146,8 +151,7 @@ class PostAPI(viewsets.ModelViewSet):
 
 class ReplyAPI(viewsets.ModelViewSet):
     serializer_class = ReplySerializer
-    http_method_names = ['get', 'head', 'post', 'patch']
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    http_method_names = ['get', 'head', 'post', 'put']
 
     def get_queryset(self):
         body = self.request.query_params.get('body')
@@ -194,7 +198,8 @@ class ReplyAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
+        # no superuser or wf_admin check
+        if member_user.id == request.data.get('created_by'):
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -206,11 +211,40 @@ class ReplyAPI(viewsets.ModelViewSet):
 
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
-
-        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
+        # no superuser or wf_admin check
+        if member_user == instance.created_by:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
+
+
+class MemberLikeOrFlagPostAPI(viewsets.ModelViewSet):
+    serializer_class = MemberLikeOrFlagPostSerializer
+    http_method_names = ['get', 'head', 'post', 'put']
+
+    def get_queryset(self):
+        flagged = self.request.query_params.get('flagged')  # bool
+        like = self.request.query_params.get('like')  # bool
+        member_id = self.request.query_params.get('member_id')  # int
+        post_id = self.request.query_params.get('post_id')  # int
+
+        queryset_params = {}
+        add_to_queryset(queryset_params, 'member_id', member_id)
+        add_to_queryset(queryset_params, 'post_id', post_id)
+
+        if (flagged == "true"):
+            add_to_queryset(queryset_params, 'flagged', True)
+        elif (flagged == "false"):
+            add_to_queryset(queryset_params, 'flagged', False)
+
+        if (like == "true"):
+            add_to_queryset(queryset_params, 'like', True)
+        elif (like == "false"):
+            add_to_queryset(queryset_params, 'like', False)
+
+        if queryset_params:
+            return MemberLikeOrFlagPost.objects.filter(**queryset_params)
+        return MemberLikeOrFlagPost.objects.all()
 
 
 class MemberLikeOrFlagReplyAPI(viewsets.ModelViewSet):

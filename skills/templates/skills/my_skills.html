@@ -8,10 +8,10 @@
     {% include 'members/base_profile.html' %}
     <div class="profile">
         <div class="profile_section">
-            <a href="/add_skill/{{profile.pk}}"><button class="bnt btn-primary">Add Skill</button></a>
+            <a href="/add_skill/{{profile.pk}}"><button class="bnt btn-primary">Add Professional Skill</button></a>
         </div>
         <div class="profile_section">
-            <div class="subtitle">Skills:</div>
+            <div class="subtitle">Professional Skills:</div>
             {% for member_skill in member_skills %}
                 <div><a href="/skill/{{member_skill.skill.pk}}">{{member_skill.skill.name}}</a></div>
             {% endfor %}

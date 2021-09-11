@@ -1,7 +1,6 @@
 from requests import Response
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
-
 from members.models import MemberUser
 from .models import Event
 from .models import Invitation
@@ -16,8 +15,7 @@ from wayfinders.functions import add_to_queryset
 
 class EventAPI(viewsets.ModelViewSet):
     serializer_class = EventSerializer
-    http_method_names = ['get', 'head', 'post', 'patch']
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    http_method_names = ['get', 'head', 'post', 'put']
 
     def get_queryset(self):
         name = self.request.query_params.get('name')
@@ -82,7 +80,6 @@ class EventAPI(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 

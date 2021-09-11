@@ -16,6 +16,8 @@ class Calendar(models.Model):
 class Filter(models.Model):
     name = models.CharField(max_length=255)
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
+    is_public = models.BooleanField(default=False)
+    color = models.CharField(default="#eb3434", max_length=255)
 
     def __str__(self):
         return '%s - %s' % (self.calendar, self.name)

@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from search.models import SearchObject
 from phonenumber_field.modelfields import PhoneNumberField
-from datetime import datetime
+from django.utils.timezone import now
 
 class Member(models.Model):
     name = models.CharField(max_length=255)
@@ -10,8 +10,8 @@ class Member(models.Model):
     main_image = models.ImageField(upload_to="profile_gallery", blank=True)
     public = models.BooleanField(default=True)
     logo = models.ImageField(upload_to="group_logo", blank=True)
-    website = models.URLField(max_length=255, null=True, blank=True)
-    business_phone = PhoneNumberField(null=True, blank=True)
+    website = models.CharField(max_length=255, null=True, blank=True)
+    business_phone = PhoneNumberField(region="CA")
     address = models.CharField(max_length=255, null=True, blank=True)
     address_2 = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=255, null=True, blank=True)
@@ -46,9 +46,9 @@ class MemberUser(models.Model):
     province = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
-    business_phone = PhoneNumberField(null=True, blank=True)
-    home_phone = PhoneNumberField(null=True, blank=True)
-    cell_phone = PhoneNumberField(null=True, blank=True)
+    business_phone = PhoneNumberField(region="CA")
+    home_phone = PhoneNumberField(region="CA")
+    cell_phone = PhoneNumberField(region="CA")
     publicly_viewable = models.BooleanField(u'Public', default=True)
     membership_since = models.DateField(auto_now_add=False, blank=True, null=True)
     main_image = models.ImageField(upload_to="profile_gallery", blank=True)
@@ -118,21 +118,21 @@ class Gallery(models.Model):
         verbose_name_plural="Galleries"
 
 class Application(models.Model):
-    surname = models.CharField(max_length=255)
-    first_name = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
+    surname = models.CharField(u'Last Name(*)', max_length=255)
+    first_name = models.CharField(u'First Name(*)', max_length=255)
+    email = models.CharField(u'Email(*)', max_length=255)
     title = models.CharField(max_length=255, blank=True, null=True)
     business_name = models.CharField(max_length=255, blank=True, null=True)
-    business_website = models.URLField(max_length=255, blank=True, null=True)
+    business_website = models.CharField(max_length=255, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(u'City/Town', max_length=255, blank=True, null=True)
     province = models.CharField(max_length=255, blank=True, null=True)
     postal_code = models.CharField(max_length=255, blank=True, null=True)
     birthdate = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = PhoneNumberField()
+    phone_number = PhoneNumberField(u'Phone Number(*)', region="CA")
     referred_by = models.CharField(max_length=255, blank=True, null=True)
     other = models.TextField(blank=True, null=True)
-    date = models.DateField(default=datetime.now())
+    date = models.DateField(default=now)
     processed = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
 
@@ -145,7 +145,7 @@ class Application(models.Model):
 
 class ApplicationUpload(models.Model):
     file = models.FileField(upload_to="application_file")
-    date = models.DateField(default=datetime.now())
+    date = models.DateField(default=now)
     processed = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
 

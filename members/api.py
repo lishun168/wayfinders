@@ -92,7 +92,7 @@ class MemberAPI(viewsets.ModelViewSet):
 
 class MemberUserAPI(viewsets.ModelViewSet):
     serializer_class = MemberUserSerializer
-    http_method_names = ['get', 'head', 'post', 'patch']
+    http_method_names = ['get', 'head', 'patch', 'post']
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
@@ -160,7 +160,6 @@ class MemberUserAPI(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 

@@ -21,7 +21,7 @@ from rest_framework import routers
 
 from cal.api import CalendarAPI, FilterAPI
 from events.api import EventAPI, InvitationAPI, ParticipantsAPI, GuestParticipantAPI
-from forum.api import DiscussionAPI, PostAPI, ReplyAPI, MemberLikeOrFlagReplyAPI
+from forum.api import DiscussionAPI, PostAPI, ReplyAPI, MemberLikeOrFlagPostAPI, MemberLikeOrFlagReplyAPI
 from groups.api import GroupsAPI, RulesAPI, GroupToMemberAPI
 from search.api import SearchObjectAPI, SearchTagsAPI
 from . import settings
@@ -105,6 +105,7 @@ from cal.views import Calendar
 from cal.views import CreateFilter
 from cal.views import MyCalendar
 from cal.views import CalendarDate
+from cal.views import EditFilter
 from events.views import CreateInvitation
 from events.views import Invite
 from events.views import CreateEvent
@@ -138,6 +139,7 @@ from groups.api import GroupToMemberAPI
 from forum.api import DiscussionAPI
 from forum.api import PostAPI
 from forum.api import ReplyAPI
+from forum.api import MemberLikeOrFlagPostAPI
 from forum.api import MemberLikeOrFlagReplyAPI
 from events.api import EventAPI
 from events.api import InvitationAPI
@@ -175,6 +177,7 @@ router.register('api/group_member', GroupToMemberAPI, 'api/group_member')
 router.register('api/discussion', DiscussionAPI, 'api/discussion')
 router.register('api/post', PostAPI, 'api/post')
 router.register('api/reply', ReplyAPI, 'api/reply')
+router.register('api/member_like_or_flag_post', MemberLikeOrFlagPostAPI, 'api/member_like_or_flag_post')
 router.register('api/member_like_or_flag_reply', MemberLikeOrFlagReplyAPI, 'api/member_like_or_flag_reply')
 # From Event application(4)
 router.register('api/event', EventAPI, 'api/event')
@@ -193,13 +196,12 @@ urlpatterns = [
     path('profile/<int:pk>/', UserProfile.as_view()),
     path('my_profile/', MyProfile.as_view()),
     path('edit_profile/<int:pk>', EditUser.as_view()),
-    path('create_member/', CreateUser.as_view()),
     path('change_password/', UpdatePassword.as_view()),
 
     path('members/', MembersDirectory.as_view()),
     path('member/<int:pk>', MemberView.as_view()),
     path('pending_approval', Approval.as_view()),
-    path('create_profile/', CreateMemberProfile.as_view()),
+    path('create_member/', CreateMemberProfile.as_view()),
     path('create_member_choice/', CreateMemberChoice.as_view()),
     path('edit_member/<int:pk>', EditMember.as_view()),
     path('edit_member_list/<int:pk>', EditMembersList.as_view()),
@@ -258,6 +260,7 @@ urlpatterns = [
     path('calendar/<int:pk>/<int:year>/<int:month>', CalendarDate.as_view()),
     path('create_filter/<int:pk>', CreateFilter.as_view()),
     path('my_calendar/', MyCalendar.as_view()),
+    path('edit_filter/<int:pk>', EditFilter.as_view()),
 
     ## EVENT APP ##
     path('edit_event/<int:pk>', UpdateEvent.as_view()),

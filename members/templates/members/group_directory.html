@@ -26,7 +26,8 @@
         $(document).ready( function() {
             $("#search-button").click( function(event) {
                 var str = $('#search_query').val();
-                var search_url = "http://127.0.0.1:8000/search/" + str;
+                const root_url = window.location.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+                var search_url = root_url + "/search/" + str;
                 window.location.replace(search_url);
             });
         });

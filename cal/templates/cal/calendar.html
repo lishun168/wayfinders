@@ -30,7 +30,7 @@
             <div class="buttons">
                 {% if can_edit %}
                     <div> <a href="/create_event/{{calendar.pk}}"><button class="bnt btn-primary">Create Event</button></a></div>
-                    <div> <a href="/create_booking/{{calendar.pk}}"><button class="bnt btn-primary">Create Booking</button></a></div>
+                    <div> <a href="/create_booking/{{calendar.pk}}"><button class="bnt btn-primary">Create Availibility</button></a></div>
                     <div> <a href="/mark_busy/{{calendar.pk}}"><button class="bnt btn-primary">Mark Busy</button></a></div>
                     <div> <a href="/create_filter/{{calendar.pk}}"><button class="bnt btn-primary">Create Calendar</button></a></div>
                 {% endif %}
@@ -39,20 +39,26 @@
         <div class="header-column">
             <div class="subtitle">Upcoming Events:</div>
             {% for event in upcoming_events %}
-                <a href="/event/{{event.pk}}"><div> {{event.name}} - {{event.date}} </div></a>
+                {% if event.public and event.sub_calendar.is_public or can_edit %}
+                    <a href="/event/{{event.pk}}"><div> {{event.name}} - {{event.date}} </div></a>
+                {% endif %}
             {% endfor %}
             <div class="subtitle">Recent Events:</div>
             {% for event in recent_events %}
-                <a href="/event/{{event.pk}}"><div> {{event.name}} - {{event.date}} </div></a>
+                {% if event.public and event.sub_calendar.is_public or can_edit %}
+                    <a href="/event/{{event.pk}}"><div> {{event.name}} - {{event.date}} </div></a>
+                {% endif %}
             {% endfor %}
         </div>
         <div class="header-column">
             <div class="subtitle">Active Calendars:</div>
             {% for filter in filters %}
-            <label data-id="{{filter.id}}" class="filter-container">{{filter.name}}
-                <input type="checkbox" {% if filter.pk in filter_params or no_params %} checked="checked" {% endif %}>
-                <span class="checkmark"></span>
-              </label><br>
+                {% if filter.is_public or can_edit %}
+                    <label data-id="{{filter.id}}" class="filter-container"><a href="/edit_filter/{{filter.id}}">{{filter.name}}</a>
+                        <input type="checkbox" {% if filter.pk in filter_params or no_params %} checked="checked" {% endif %}>
+                        <span class="checkmark"></span>
+                    </label><br>
+                {% endif %}
             {% endfor %}
             <div> <button class="bnt btn-primary filter-button">Select</button></div>
         </div>
@@ -260,10 +266,6 @@
                         
                     }
                 });
-
-                if(filter_added === false){
-                    url = url.slice(0, -2);
-                }
                 location.href = url;
             })
         })

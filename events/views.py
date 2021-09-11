@@ -149,7 +149,8 @@ class CreateEvent(LoginPermissionMixin, CreateView):
 class CreateBooking(CreateView):
     template_name = 'create_edit_model.html'
     model = Event
-    fields = ('location', 'description', 'event_type', 'date', 'time',  'end_time', 'booking_interval_minutes', 'booking_interval_buffer')
+    fields = ('name', 'location', 'description', 'event_type', 'date', 'time',  'end_time', 'booking_interval_minutes', 'booking_interval_buffer',
+    'sub_calendar', 'public')
 
     def get_form(self):
         form = super(CreateBooking, self).get_form()
@@ -183,7 +184,23 @@ class CreateBooking(CreateView):
             add_hours = get_hours(0, add_time)
             start_minute = add_time - (add_hours * 60)
             new_obj = Event()
-            new_obj = obj
+            new_obj.name = obj.name
+            new_obj.description = obj.description
+            new_obj.location = obj.location
+            new_obj.calendar = obj.calendar
+            new_obj.date = obj.date
+            new_obj.time = obj.time
+            new_obj.end_time = obj.end_time
+            new_obj.sub_calendar = obj.sub_calendar
+            new_obj.public = obj.public
+            new_obj.is_open = obj.is_open
+            new_obj.open_editing = obj.open_editing
+            new_obj.allow_booking = obj.allow_booking
+            new_obj.busy_private = obj.busy_private
+            new_obj.booking_interval_minutes = obj.booking_interval_minutes
+            new_obj.booking_interval_buffer = obj.booking_interval_buffer
+            new_obj.event_type = obj.event_type
+
 
             #TODO Doesnt account for day change, month change, year change
             start_hour = new_obj.time.hour + add_hours
@@ -320,14 +337,13 @@ class UpdateEvent(LoginPermissionMixin, UpdateView):
         success_url = "/calendar/" + str(self.object.calendar.id)
         return HttpResponseRedirect(success_url)
 
-class ViewEvent(LoginPermissionMixin, View):
+class ViewEvent(View):
     template_name = 'events/event.html'
     
     def get(self, request, pk):
         event = Event.objects.get(pk=pk)
         invitations = Invitation.objects.filter(events=event)
         participants = Participants.objects.filter(events=event)
-        member = MemberUser.objects.get(user=request.user)
 
         context = {
             'event': event,
@@ -335,28 +351,31 @@ class ViewEvent(LoginPermissionMixin, View):
             'participants': participants
         }
 
-        if event.calendar.user == None:
-            context['member_calendar'] = True
-            context['user_calendar'] = False
-        elif event.calendar.member == None:
-            context['user_calendar'] = True
-            context['member_calendar'] = False
-        else:
-            context['user_calendar'] = False
-            context['member_calendar'] = False
+        if request.user.is_authenticated == True:
 
-        try:
-            my_participation = Participants.objects.get(events=event, member=member)
-            context.update({
-                'my_part': True,
-                'admin': my_participation.is_administrator
-            })
-            return render(request, self.template_name, context)
-        except Participants.DoesNotExist:
-            context.update({
-                'my_part': False
-            })
-            return render(request, self.template_name, context)
+            member = MemberUser.objects.get(user=request.user)
+
+            if event.calendar.user == None:
+                context['member_calendar'] = True
+                context['user_calendar'] = False
+            elif event.calendar.member == None:
+                context['user_calendar'] = True
+                context['member_calendar'] = False
+            else:
+                context['user_calendar'] = False
+                context['member_calendar'] = False
+
+            try:
+                my_participation = Participants.objects.get(events=event, member=member)
+                context.update({
+                    'my_part': True,
+                    'admin': my_participation.is_administrator
+                })
+            except Participants.DoesNotExist:
+                context.update({
+                    'my_part': False
+                })
+        return render(request, self.template_name, context)
 
 def get_hours(hours, minutes):
     if minutes >= 60:

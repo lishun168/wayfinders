@@ -9,7 +9,7 @@
     <div class="input-group mb-3">
         <input id="search_query" type="text" class="form-control" placeholder="Search Directory" aria-label="Search" aria-describedby="basic-addon2">
         <div class="input-group-append">
-          <button id="search-button" class="button-search btn btn-outline-secondary" type="button">Search</button>
+          <button id="search-button" class="button-search btn btn-outline-secondary" type="button" style="z-index: 0;">Search</button>
         </div>
     </div>
     {% if query %}
@@ -28,7 +28,8 @@
         $(document).ready( function() {
             $("#search-button").click( function(event) {
                 var str = $('#search_query').val();
-                var search_url = "http://127.0.0.1:8000/search/" + str;
+                const root_url = window.location.protocol + "//" + window.location.host;
+                var search_url = root_url + "/search/" + str;
                 window.location.replace(search_url);
             });
         });

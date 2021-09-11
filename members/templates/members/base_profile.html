@@ -8,11 +8,13 @@
                 <a class="profile_link" href="/profile/{{profile.pk}}"><h3>{{profile.first_name}} {{profile.last_name}} - {{profile.job_title}}</h3></a>
             </div>
             <div>
+            {% if user.is_authenticated %}
                 {% if flagged %}
                     <a href="/flag_user/{{user.pk}}/{{profile.pk}}"><div class="right-side"><img src="{%static 'members/img/flag_filled.png' %}" width="25" height="25"></div></a>
                 {% else %}
                     <a href="/flag_user/{{user.pk}}/{{profile.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
                 {% endif %}
+            {% endif %}
             </div>
             <div class="inline charm-bar">
                 {% if my_profile or admin %}

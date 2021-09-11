@@ -66,7 +66,7 @@
                                 <a href="/flag/{{user.pk}}/{{post.pk}}"><div class="right-side"><img src="{%static 'members/img/flag.png' %}" width="25" height="25"></div></a>
                         {% endif %}
                              </div>
-                       <div class="text_button"> <a href="/forum/reply/{{post.thread.pk}}/{{post.pk}}">REPLY</a></div>
+                       <div class="text_button"> <a href="/forum/reply/{{post.discussion.pk}}/{{post.pk}}">REPLY</a></div>
                    </div>  
                 </div>
             </div>
@@ -107,7 +107,6 @@
     </div>
 
     <div class="section">
-        <div>Add a Post</div>
         <div class="button_container">
             <a href="/forum/post/{{thread.pk}}"><button type="button" class="btn btn-primary post-button">Create Post</button></a>
         </div>

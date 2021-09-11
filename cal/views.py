@@ -14,7 +14,7 @@ from members.models import UserToMember
 from members.models import UserRole
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators import csrf
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.utils.html import conditional_escape as esc
 from login.views import LoginPermissionMixin
 
@@ -59,23 +59,19 @@ class EventCalendar(HTMLCalendar):
                         event_html = '<a href=' + event_link + '>'
                         body.append('<div>')
                         body.append(event_html)
-                        body.append(esc(str(event.time.hour) + "-" + event.name))
+                        body.append(esc(str(event.time.strftime("%I:%M %p")) + " " + event.name))
                         body.append('</a></div>')
                     
                     elif event.busy_private == True or event.public == False:
                         body.append('<div class="busy-private">')
-                        body.append(esc("Busy " + str(event.time.hour) + 
-                        ":" + str(event.time.minute) + " - " + str(event.end_time.hour) +
-                        ":" + str(event.end_time.minute)))
+                        body.append(esc("Busy " + str(event.time.strftime("%I:%M %p")) + ' - ' + str(event.end_time.strftime("%I:%M %p"))))
                         body.append('</div>')
                     elif event.allow_booking == True:
                         event_link = '/book_event/' + str(event.pk) + "/" + str(self.calendar.pk)
                         event_html = '<a href=' + event_link + '>'
                         body.append('<div class="allow-booking">')
                         body.append(event_html)
-                        body.append(esc("Book time " + str(event.time.hour) + 
-                        ":" + str(event.time.minute) + " - " + str(event.end_time.hour) +
-                        ":" + str(event.end_time.minute)))
+                        body.append(esc("Book time " + str(event.time.strftime("%I:%M %p")) + ' - ' + str(event.end_time.strftime("%I:%M %p"))))
                         body.append('</a></div>')
                                   
                 body.append('</div>')
@@ -117,14 +113,20 @@ def get_calendar_context(calendar, filter, filter_params, date, can_edit, member
             'upcoming_events': upcoming_events,
             'recent_events': recent_events,
             'can_edit': can_edit
-    }  
-
+    } 
    
-    if filter_params == []:
+    if filter_params == [] and can_edit:
         events = Event.objects.filter(date__year=date.year, date__month=date.month, calendar=calendar)
         html_c = EventCalendar(events, calendar, can_edit, member_user).formatmonth(date.year, date.month)
         context['html_calendar'] = mark_safe(html_c)
         context['no_params'] = True
+    elif filter_params == [] and can_edit == False:
+        public_filters = Filter.objects.filter(is_public=True)
+        filter_ids = [filter.id for filter in public_filters]
+        events = Event.objects.filter(date__year=date.year, date__month=date.month, calendar=calendar, sub_calendar__in=filter_ids)
+        html_c = EventCalendar(events, calendar, can_edit, member_user).formatmonth(date.year, date.month)
+        context['html_calendar'] = mark_safe(html_c)
+        context['no_params'] = False
     else:
         for i in range(0, len(filter_params)):
             filter_params[i] = int(filter_params[i])
@@ -190,7 +192,7 @@ class Calendar(View):
 
         return render(request, self.template_name, context)
 
-class CalendarDate(LoginPermissionMixin, View):
+class CalendarDate(View):
     template_name = 'cal/calendar.html'
 
     def get(self, request, pk, year, month):
@@ -239,7 +241,7 @@ class CalendarDate(LoginPermissionMixin, View):
 class CreateFilter(LoginPermissionMixin, CreateView):
     template_name = 'create_edit_model.html'
     model = Filter
-    fields = ('name',)
+    fields = ('name', 'is_public')
 
     def get_context_data(self, **kwargs):
         context = super(CreateFilter, self).get_context_data(**kwargs)
@@ -258,7 +260,27 @@ class CreateFilter(LoginPermissionMixin, CreateView):
 
         success_url = "/calendar/" + str(cal_pk)
         return HttpResponseRedirect(success_url)
+
+class EditFilter(LoginPermissionMixin, UpdateView):
+    template_name = 'create_edit_model.html'
+    model = Filter
+    fields = ('name', 'is_public')
+
+    def get_context_data(self, **kwargs):
+        context = super(EditFilter, self).get_context_data(**kwargs)
+        context['button_text'] = 'Update Calendar'
+        return context
+
+    def dispatch(self, *args, **kwargs):
+        return super(EditFilter, self).dispatch(*args, **kwargs)
     
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+       
+        obj.save()
+
+        success_url = "/calendar/" + str(obj.calendar.pk)
+        return HttpResponseRedirect(success_url)
 
 @csrf.csrf_exempt
 def create_event(request):

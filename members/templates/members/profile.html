@@ -8,20 +8,24 @@
     {% include 'members/base_profile.html' %}
     <div class="profile">
         <div class="profile_section">
-            <div class="subtitle">Member:</div>
-            <div><a href="/member/{{profile.member.pk}}">{{profile.member}}</a></div>
+            <div class="subtitle">Principle Wayfinders Member:</div>
+            <div><a href="/member/{{profile.primary_member.pk}}">{{profile.primary_member}}</a></div>
         </div>
         <div class="profile_section">
             <div class="subtitle">Calendars:</div>
             {% for filter in filters %}
-            <div><a href="/calendar/{{filter.calendar.pk}}?filters={{filter.pk}}">{{filter.name}}</a></div>
+                {% if filter.is_public or admin or my_profile %}
+                    <div><a href="/calendar/{{filter.calendar.pk}}?filters={{filter.pk}}">{{filter.name}}</a></div>
+                {% endif %}
             {% endfor %}
         </div>
 
         <div class="profile_section">
         <div class="subtitle">Upcoming Participating Events:</div>
         {% for part in participations %}
-            <a href="/event/{{part.events.pk}}"><div> {{part.events.name}} - {{part.events.date}} </div></a>
+            {% if part.events.public or admin or my_profile %}
+                <a href="/event/{{part.events.pk}}"><div> {{part.events.name}} - {{part.events.date}} </div></a>
+            {% endif %}
         {% endfor %}
     </div>
 
@@ -52,44 +56,23 @@
         </div>
         <div class="profile_section">
             {% if my_profile or admin%}
-            <a href="/my_groups/{{profile.pk}}" > 
-                <div class="inline">
-                    <div class="subtitle">Groups:</div>
-                    <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> 
-                </div>
-            </a>
-            {% else %}
-            <div class="inline">
-                <div class="subtitle">Groups:</div> 
-            </div>
-            {% endif %}
-            {% for company in member_companies %}
-                {% if my_profile %}
-                <a href="/group/{{company.company.pk}}"><div>{{company.company}}</div></a>
-                {% else %}
-                    {% if company.public == True %}
-                    <a href="/group/{{company.company.pk}}"><div>{{company.company}}</div></a>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
-        <div class="profile_section">
-            {% if my_profile or admin%}
             <a href="/my_skills/{{profile.pk}}" > 
                 <div class="inline">
-                    <div class="subtitle">Skills:</div>
+                    <div class="subtitle">Professional Skills:</div>
                     <img src="{%static 'members/img/edit.png' %}" height="16" width="16"> 
                 </div>
             </a>
             {% else %}
             <div class="inline">
-                <div class="subtitle">Skills:</div>
+                <div class="subtitle">Professional Skills:</div>
             </div>
             {% endif %}
             {% for skill in user_skills %}
                 <div class="inline">
                     <a href="/skill/{{skill.pk}}"><div>{{skill.skill}}</div></a>
-                    <a href="/remove_skill_user/{{skill.pk}}/{{profile.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                    {% if my_profile or admin %}
+                        <a href="/remove_skill_user/{{skill.pk}}/{{profile.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -109,7 +92,9 @@
             {% for industry in user_industries %}
                 <div class="inline">
                     <a href="/industry/{{industry.industry.pk}}"><div>{{industry.industry.name}}</div></a>
-                    <a href="/remove_industry_user/{{industry.pk}}/{{profile.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                    {% if my_profile or admin %}
+                        <a href="/remove_industry_user/{{industry.pk}}/{{profile.pk}}"><img src="{%static 'members/img/close.png' %}" height="16" width="16"></a>
+                    {% endif %}
                 </div>
                 
             {% endfor %}

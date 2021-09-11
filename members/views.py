@@ -15,6 +15,7 @@ from django.views.decorators import csrf
 from django.utils import timezone
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.auth.forms import PasswordChangeForm
+from django.db import IntegrityError
 
 ##           FORMS              ##
 from .forms import ApplicationForm
@@ -59,7 +60,7 @@ class MyProfile(LoginPermissionMixin, View):
         address = '/profile/' + str(id)
         return HttpResponseRedirect(address)
 
-class UserProfile(LoginPermissionMixin, View):
+class UserProfile(View):
     template_name = 'members/profile.html'
 
     def get(self, request, pk):
@@ -83,16 +84,16 @@ class UserProfile(LoginPermissionMixin, View):
             'participations': participations
         }
 
-        try:
-            current_user = MemberUser.objects.get(user=self.request.user)
-            user_flag_user = UserFlagUser.objects.get(flagged_user=user, user=current_user)
-            if user_flag_user.flagged == True:
-                context['flagged'] = True
-        except UserFlagUser.DoesNotExist:
-            context['flagged'] = False
-
-        if request.user is not None:
+        if request.user.is_authenticated == True:
             mId = request.user.pk
+            try:
+                current_user = MemberUser.objects.get(user=self.request.user)
+                user_flag_user = UserFlagUser.objects.get(flagged_user=user, user=current_user)
+                if user_flag_user.flagged == True:
+                    context['flagged'] = True
+            except UserFlagUser.DoesNotExist:
+                context['flagged'] = False
+
             user_member = MemberUser.objects.get(user=mId)
             if(user_member.pk == user.pk):
                 context['my_profile'] = True
@@ -134,16 +135,12 @@ class EditUser(LoginPermissionMixin, UpdateView):
 
     def get_object(self, *args, **kwargs):
         obj = super(EditUser, self).get_object(*args, **kwargs)
-        try:
-            user = MemberUser.objects.get(user=self.request.user)
-            admin_user = False
-            active_user = MemberUser.objects.get(user=self.request.user)
-            if active_user.is_wf_admin and active_user.member == user.member:
-                admin_user = True  
-            if user.pk == self.kwargs.get('pk') or self.request.user.is_superuser or admin_user:
+        if self.request.user.is_authenticated:
+            member_user = MemberUser.objects.get(user=self.request.user)
+            
+            if self.request.user.is_superuser or member_user.is_wf_admin or obj == member_user:
                 return obj
-        except MemberUser.DoesNotExist:
-            raise PermissionDenied()
+                
         raise PermissionDenied()
 
     def get_context_data(self, **kwargs):
@@ -221,11 +218,9 @@ class CreateMemberChoice(View):
 
 class CreateMemberProfile(CreateView):
     template_name = 'create_edit_model.html'
-    model = MemberUser
+    model = Member
     fields = (
-        'first_name', 
-        'last_name', 
-        'job_title', 
+        'name', 
         'address', 
         'address_2', 
         'city',
@@ -233,33 +228,31 @@ class CreateMemberProfile(CreateView):
         'country',
         'postal_code',
         'business_phone',
-        'email',
+        'business_email',
         'website',
-        'bio',
-        'publicly_viewable',
+        'description',
+        'public',
         'main_image'
         )
 
     def get_context_data(self, **kwargs):
         context = super(CreateMemberProfile, self).get_context_data(**kwargs)
-        context['button_text'] = 'Create Profile'
+        context['button_text'] = 'Create Member'
         return context
 
     def form_valid(self, form):
         obj = form.save(commit=False)
-        user = User.objects.get(pk=self.request.user.pk)
-        obj.user = user
         obj.membership_since = timezone.now()
         obj.save() 
         
         calendar = Calendar()
         calendar.public = True
-        calendar.name = "Calendar for " + obj.first_name + " " + obj.last_name
+        calendar.name = obj.name + " Calendar"
         calendar.member = obj
 
         calendar.save()
 
-        success_url = "/pending_approval"
+        success_url = "/members"
         return HttpResponseRedirect(success_url)
 
 class MembersDirectory(View):
@@ -311,15 +304,14 @@ class MemberView(View):
             'recent_events': recent_events
         }
 
-        try:
-            current_user = MemberUser.objects.get(user=self.request.user)
-            user_flag_member = UserFlagMember.objects.get(member=member, user=current_user)
-            if user_flag_member.flagged == True:
-                context['flagged'] = True
-        except UserFlagMember.DoesNotExist:
-            context['flagged'] = False
-
         if request.user.is_authenticated == True:
+            try:
+                current_user = MemberUser.objects.get(user=self.request.user)
+                user_flag_member = UserFlagMember.objects.get(member=member, user=current_user)
+                if user_flag_member.flagged == True:
+                    context['flagged'] = True
+            except UserFlagMember.DoesNotExist or MemberUser.DoesNotExist:
+                context['flagged'] = False
             user_member = MemberUser.objects.get(user=request.user.pk)
             user_to_member = UserToMember.objects.get(member_user__user=request.user.pk)
             context['is_owner'] = user_to_member.is_owner
@@ -697,14 +689,24 @@ class SignUp(WFAdminPermissionMixin, CreateView):
 
         member_pk = self.kwargs.get('pk')
         member = Member.objects.get(pk=member_pk)
-        member_user = MemberUser()
-        if MemberUser.objects.filter(email=member_user.email).exists():
-            member_user = MemberUser.objects.get(email=member_user.email)
+        first_name = form.cleaned_data['first_name']
+        last_name = form.cleaned_data['last_name']
+        email = form.cleaned_data['email']
+        if MemberUser.objects.filter(email=email).exists():
+            logger.error("user exists")
+            member_user = MemberUser.objects.get(email=email)
+            try:
+                user_to_member = UserToMember()
+                user_to_member.member = member
+                user_to_member.member_user = member_user
+                user_to_member.save()
+            except IntegrityError:
+                logger.error("user is already part of that member")
         else:
             member_user = MemberUser()
-            member_user.first_name = form.cleaned_data['first_name']
-            member_user.last_name = form.cleaned_data['last_name']
-            member_user.member = member
+            member_user.first_name = first_name
+            member_user.last_name = last_name
+            member_user.primary_member = member
             member_user.user = obj
             member_user.save()
 
@@ -713,19 +715,21 @@ class SignUp(WFAdminPermissionMixin, CreateView):
             calendar.name = member_user.first_name + member_user.last_name + "s Calendar"
             calendar.save()
 
-        user_to_member = UserToMember()
-        user_to_member.member = member
-        user_to_member.member_user = member_user
-        user_to_member.save()
+            user_to_member = UserToMember()
+            user_to_member.member = member
+            user_to_member.member_user = member_user
+            user_to_member.save()
 
-        permissions = Permissions()
-        permissions.title = "New Permissions"
-        permissions.save()
+            permissions = Permissions()
+            permissions.role_title = "New Permissions"
+            permissions.member = member
+            permissions.save()
 
-        user_role = UserRole()
-        user_role.user = member_user
-        user_role.permissions = permissions
-        user_role.save()
+            user_role = UserRole()
+            user_role.user = member_user
+            user_role.permissions = permissions
+            user_role.member = member
+            user_role.save()
 
         success_url = '/member/' + str(member_pk)
         return HttpResponseRedirect(success_url)
@@ -839,7 +843,25 @@ class ApplicationSubmit(View):
             application.approved = True
 
         application.save()
-       
+
+        member = Member()
+        member.name = application.first_name + " " + application.surname
+        member.business_email = application.email
+        member.website = application.business_website
+        member.business_phone = application.phone_number
+        member.address = application.address
+        member.city = application.city
+        member.province = application.province
+        member.postal_code = application.postal_code
+        member.save()
+
+        calendar = Calendar()
+        calendar.name = member.name + " Calendar"
+        calendar.member = member
+        calendar.save()
+
+        logger.error(member)
+
         return HttpResponseRedirect(success_url)
 
 class ViewApplications(View):
@@ -935,7 +957,7 @@ def flag_user(request, member_pk, flagged_member_pk):
         user_flag_user = UserFlagUser()
         user_flag_user.flagged = True
         user_flag_user.user = member
-        user_flag_user.flagged_user = flagged_member_pk
+        user_flag_user.flagged_user = flagged_member
         user_flag_user.save()
 
         flagged_member.number_of_flags += 1

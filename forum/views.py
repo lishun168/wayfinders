@@ -259,7 +259,7 @@ class UpdatePost(LoginPermissionMixin, UpdateView):
 
     def form_valid(self, form):
         obj = form.save(commit=False)
-        thread_pk = obj.thread.pk
+        thread_pk = obj.discussion.pk
         obj.save()
 
         success_url = '/forum/' + str(thread_pk)
@@ -287,7 +287,7 @@ class CreateReply(LoginPermissionMixin, CreateView):
 
         thread_pk = self.kwargs.get('pk')
         thread = Discussion.objects.get(pk=thread_pk)
-        obj.thread = thread
+        obj.discussion = thread
 
         post_pk = self.kwargs.get('post_pk')
         post = Post.objects.get(pk=post_pk)
@@ -323,7 +323,7 @@ class UpdateReply(LoginPermissionMixin, UpdateView):
 
     def form_valid(self, form):
         obj = form.save(commit=False)
-        thread_pk = obj.thread.pk
+        thread_pk = obj.discussion.pk
         obj.save()
 
         success_url = '/forum/' + str(thread_pk)

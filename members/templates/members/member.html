@@ -40,7 +40,7 @@
                 <div class="inline"><a href="/edit_member/{{member.pk}}" > <img src="{%static 'members/img/edit.png' %}" height="30" width="30"> EDIT PROFILE</a></div>
                 {% endif %}
                 {% if is_owner or member_admin %}
-                <div class="inline"><a href="/signup/{{member.pk}}" > <img src="{%static 'members/img/plus.png' %}" height="30" width="30"> ADD MEMBER</a></div>
+                <div class="inline"><a href="/signup/{{member.pk}}" > <img src="{%static 'members/img/plus.png' %}" height="30" width="30"> ADD MEMBER USER</a></div>
                 {% endif %}
                 {% if is_owner or member_admin%}
                 <div class="inline"><a href="/permissions/{{member.pk}}" > <img src="{%static 'members/img/permissions.png' %}" height="30" width="30"> ADD PERMISSIONS</a></div>
@@ -51,13 +51,14 @@
             </div>
         </div>
     </div>
-   
-    <div class="profile_picture">
-        {% if member.main_image.url != None %}
-        <img src="{{member.main_image.url}}" width="400" height="650" style="width: 400px; height: 650px; object-fit: contain; object-position: left top; margin-top: 5px;">
-        {% endif %}
+    <div class="profile_wrapper" style="display: inline-block; overflow: hidden; width: 500px; float: left;">
+        <div class="profile_picture" >
+            {% if member.main_image.url != None %}
+            <img src="{{member.main_image.url}}" width="400" height="650" style="width: 400px; height: 650px; object-fit: contain; object-position: left top; margin-top: 5px;">
+            {% endif %}
+        </div>
     </div>
-
+    <div style='display: inline-block; float: left;'>
     <div class="profile_section">
         <div class="subtitle">About Us:</div>
         <div class="bio">{{member.description}}</div>
@@ -105,13 +106,13 @@
         {% if member_admin or is_owner %}
         <a href="/member_skills/{{member.pk}}" > 
             <div class="subtitle_section">
-                <div class="subtitle">Skills:</div>
+                <div class="subtitle">Professional Skills:</div>
                 <div class="edit_img"><img src="{%static 'members/img/edit.png' %}" height="16" width="16"></div>
             </div>
         </a>
         {% else %}
         <div class="inline">
-            <div class="subtitle">Skills:</div>
+            <div class="subtitle">Professional Skills:</div>
         </div>
         {% endif %}
         {% for skill in member_skills %}
@@ -148,7 +149,7 @@
     </div>
     <div class="profile_section">
         <div class="subtitle_section">
-            <div class="subtitle">Members: </div>
+            <div class="subtitle">Member Users: </div>
             {% if member_admin or is_owner %}
             <a href="/edit_member_list/{{member.pk}}" > 
                     <div class="edit_img"><img src="{%static 'members/img/edit.png' %}" height="16" width="16"> </div>
@@ -160,6 +161,7 @@
                 <div>{{list_member.member_user.first_name}} {{list_member.member_user.last_name}}</div>
             </a>
         {% endfor %}
+    </div>
     </div>
 </div>
 
