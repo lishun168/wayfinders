@@ -1,7 +1,6 @@
+from django.core.exceptions import PermissionDenied
 from requests import Response
 from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
-
 from members.models import MemberUser
 from .models import Calendar
 from .models import Filter
@@ -38,8 +37,9 @@ class CalendarAPI(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
+        instance = serializer.data
 
-        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
+        if instance.user.user == user or user.is_superuser or member_user.is_wf_admin:
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -52,7 +52,7 @@ class CalendarAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
+        if instance.user.user == user or user.is_superuser or member_user.is_wf_admin:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -78,8 +78,9 @@ class FilterAPI(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
+        instance = serializer.data
 
-        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
+        if instance.calendar.user.user == user or user.is_superuser or member_user.is_wf_admin:
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -92,7 +93,7 @@ class FilterAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
+        if instance.calendar.user.user == user or user.is_superuser or member_user.is_wf_admin:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()

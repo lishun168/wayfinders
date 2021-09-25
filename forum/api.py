@@ -16,9 +16,7 @@ from django.core.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 import logging
-
 logger = logging.getLogger(__name__)
-
 
 class DiscussionAPI(viewsets.ModelViewSet):
     serializer_class = DiscussionSerializer
@@ -52,16 +50,15 @@ class DiscussionAPI(viewsets.ModelViewSet):
         if queryset_params:
             return Discussion.objects.filter(**queryset_params)
         return Discussion.objects.all()
-
+    
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)       
         serializer.is_valid(raise_exception=True)
 
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        # no superuser or wf_admin check
-        if member_user.id == request.data.get('created_by'):
+        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -74,8 +71,7 @@ class DiscussionAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        # no superuser or wf_admin check
-        if member_user == instance.created_by:
+        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -121,33 +117,6 @@ class PostAPI(viewsets.ModelViewSet):
             return Post.objects.filter(**queryset_params)
         return Post.objects.all()
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = self.request.user
-        member_user = MemberUser.objects.get(user=user)
-
-        # no superuser or wf_admin check
-        if member_user.id == request.data.get('created_by'):
-            self.perform_create(serializer)
-            return Response(serializer.data)
-        raise PermissionDenied()
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
-        user = self.request.user
-        member_user = MemberUser.objects.get(user=user)
-
-        # no superuser or wf_admin check
-        if member_user == instance.created_by:
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        raise PermissionDenied()
-
 
 class ReplyAPI(viewsets.ModelViewSet):
     serializer_class = ReplySerializer
@@ -190,32 +159,6 @@ class ReplyAPI(viewsets.ModelViewSet):
         if queryset_params:
             return Reply.objects.filter(**queryset_params)
         return Reply.objects.all()
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = self.request.user
-        member_user = MemberUser.objects.get(user=user)
-
-        # no superuser or wf_admin check
-        if member_user.id == request.data.get('created_by'):
-            self.perform_create(serializer)
-            return Response(serializer.data)
-        raise PermissionDenied()
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-
-        user = self.request.user
-        member_user = MemberUser.objects.get(user=user)
-        # no superuser or wf_admin check
-        if member_user == instance.created_by:
-            self.perform_update(serializer)
-            return Response(serializer.data)
-        raise PermissionDenied()
 
 
 class MemberLikeOrFlagPostAPI(viewsets.ModelViewSet):

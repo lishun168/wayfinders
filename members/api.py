@@ -20,9 +20,7 @@ from rest_framework import permissions
 from rest_framework.authtoken.models import Token
 
 import logging
-
 logger = logging.getLogger('members.api')
-
 
 class MemberAPI(viewsets.ModelViewSet):
     serializer_class = MemberSerializer
@@ -65,7 +63,7 @@ class MemberAPI(viewsets.ModelViewSet):
         add_to_queryset(queryset_params, 'business_email__icontains', business_email)
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)       
         serializer.is_valid(raise_exception=True)
 
         user = self.request.user
@@ -88,7 +86,6 @@ class MemberAPI(viewsets.ModelViewSet):
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
-
 
 class MemberUserAPI(viewsets.ModelViewSet):
     serializer_class = MemberUserSerializer
@@ -158,12 +155,12 @@ class MemberUserAPI(viewsets.ModelViewSet):
         return MemberUser.objects.all()
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data) 
         serializer.is_valid(raise_exception=True)
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
-
-        if member_user.id == request.data.get('created_by') or user.is_superuser or member_user.is_wf_admin:
+        
+        if user.is_superuser or member_user.is_wf_admin:
             self.perform_create(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
@@ -176,11 +173,11 @@ class MemberUserAPI(viewsets.ModelViewSet):
         user = self.request.user
         member_user = MemberUser.objects.get(user=user)
 
-        if member_user == instance.created_by or user.is_superuser or member_user.is_wf_admin:
+        if user.is_superuser or member_user.is_wf_admin:
             self.perform_update(serializer)
             return Response(serializer.data)
         raise PermissionDenied()
-
+    
 
 class UserToMemberAPI(viewsets.ModelViewSet):
     serializer_class = UserToMemberSerializer
@@ -270,8 +267,8 @@ class UserRoleAPI(viewsets.ModelViewSet):
 
     def get_queryset(self):
         permissions_id = self.request.query_params.get('permissions_id')  # int
-        user_id = self.request.query_params.get('user_id')  # int
-        member_id = self.request.query_params.get('member_id')  # int
+        user_id = self.request.query_params.get('user_id')   # int
+        member_id = self.request.query_params.get('member_id')   # int
 
         queryset_params = {}
         add_to_queryset(queryset_params, 'permissions_id', permissions_id)

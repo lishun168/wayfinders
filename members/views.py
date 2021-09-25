@@ -305,6 +305,8 @@ class MemberView(View):
         }
 
         if request.user.is_authenticated == True:
+            context['member_admin'] = False
+            context['member_of'] = False
             try:
                 current_user = MemberUser.objects.get(user=self.request.user)
                 user_flag_member = UserFlagMember.objects.get(member=member, user=current_user)
@@ -312,39 +314,45 @@ class MemberView(View):
                     context['flagged'] = True
             except UserFlagMember.DoesNotExist or MemberUser.DoesNotExist:
                 context['flagged'] = False
+            
             user_member = MemberUser.objects.get(user=request.user.pk)
-            user_to_member = UserToMember.objects.get(member_user__user=request.user.pk)
-            context['is_owner'] = user_to_member.is_owner
-            if user_to_member.member == member:
-                user_role = UserRole.objects.get(user=user_member)
-                context['member_admin'] = user_role.permissions.is_member_admin
+            user_to_members = UserToMember.objects.filter(member_user__user=request.user.pk, member=member)
+            for user_to_member in user_to_members:
                 context['member_of'] = True
-            else:
-                context['member_admin'] = False
-                context['member_of'] = False
+                if user_to_member.is_owner:
+                    context['is_owner'] = True
+                elif user_to_member.member == member:
+                    user_roles = UserRole.objects.filter(user=user_member, member=member)
+                    for user_role in user_roles:
+                        if user_role.permissions.is_member_admin:
+                            context['member_admin'] = True
 
         return render(request, self.template_name, context)
 
 class EditMember(UpdateView):
     template_name = 'create_edit_model.html'
     model = Member
-    form_class = MemberForm
+    fields = ('name', 'description', 'main_image', 'public', 'logo', 'website', 'business_phone', 'address', 'address_2', 'city', 'country', 'postal_code',
+    'business_email')
 
     def get_object(self, *args, **kwargs):
         obj = super(EditMember, self).get_object(*args, **kwargs)
+        user = self.request.user
+        member_user = MemberUser.objects.get(user=user)
+        if user.is_superuser or member_user.is_wf_admin:
+            return obj
+
         try:
-            admin_user = False
-            is_member = False
-            user = MemberUser.objects.get(user=self.request.user)
-            user_to_member = UserToMember.objects.get(member_user__user=self.request.user, member=obj)
-            user_role = UserRole.objects.get(user=user, member=obj)
-            if user_to_member.member == obj:
-                is_member = True
-            if is_member and (user_role.permissions.is_member_admin or user_role.permissions.can_edit_company_profile):
-                admin_user = True
-            if user.pk == self.kwargs.get('pk') or self.request.user.is_superuser or admin_user or user.is_wf_admin:
+            user_to_member = UserToMember.objects.get(member_user__user=user, member=obj)
+
+            if user_to_member.is_owner:
                 return obj
-        except MemberUser.DoesNotExist:
+
+            user_role = UserRole.objects.get(user=member_user, member=obj)
+
+            if user_role.permissions.is_member_admin or user_role.permissions.can_edit_company_profile:
+                return obj
+        except UserToMember.DoesNotExist or UserRole.DoesNotExist:
             raise PermissionDenied()
         raise PermissionDenied()
 
